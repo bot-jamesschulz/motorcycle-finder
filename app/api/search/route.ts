@@ -1,11 +1,20 @@
-export async function GET() {
-const res = await fetch('https://data.mongodb-api.com/...', {
-    headers: {
-    'Content-Type': 'application/json',
-    'API-Key': 'asdsad',
-    },
-})
-const data = await res.json()
+import Supabase from '@/lib/dbConfig';
 
-return Response.json({ data })
+export async function GET(request: Request) {
+
+if (!Supabase) {
+    return new Response(null, { status: 500})
 }
+
+let { data: listings, error } = await Supabase
+    .from('listings')
+    .select()
+    .like('detailsUrl', '%arcadia%');
+
+if (error) console.log('Error retrieving results', error)
+console.log('Results', listings)
+
+
+return Response.json({ listings })
+}
+
