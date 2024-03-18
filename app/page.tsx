@@ -12,10 +12,13 @@ export default function Home() {
     // console.log(await results.json());
   }
 
+
   return (
     <div className="flex justify-center items-center h-screen">
-      <Search searchHandler={searchHandler}/>
-      <Results />   
+      <div className="flex flex-col">
+        <Search searchHandler={searchHandler} />
+        <Results />   
+      </div>
     </div>
   );
 }
