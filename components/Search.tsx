@@ -96,8 +96,8 @@ export function Search({ searchHandler}: SearchProps) {
 
     return  (
         <Form {...form}>
-            <form onSubmit={form.handleSubmit(searchHandler)} className="w-2/3 space-y-6 z-0">
-                <div className="flex flex-col gap-5 w-max h-1/2 max-w-lg">
+            <form onSubmit={form.handleSubmit(searchHandler)} className="">
+                <div className="flex flex-col gap-5 w-full h-1/2 max-w-lg">
                     <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl">Find your next motorcycle.</h1>
                     <div className="w-full">
                         <FormField
