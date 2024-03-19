@@ -15,7 +15,7 @@ export default function Home() {
 
   return (
     <div className="flex justify-center items-center h-screen">
-      <div className="flex flex-col w-full p-3">
+      <div className="flex flex-col justify-center items-center w-full p-3">
         <Search searchHandler={searchHandler} />
         <Results />   
       </div>
