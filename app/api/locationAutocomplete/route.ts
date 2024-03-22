@@ -5,7 +5,7 @@ import Fuse from 'fuse.js'
 const fuseOptions = {
 	includeScore: true,
 	includeMatches: true,
-	threshold: 0.25,
+	threshold: 0.4,
 	keys: [
 		"zipCode",
 		"city"
@@ -26,6 +26,9 @@ export async function GET(request: NextRequest) {
 
 	fuseResults.forEach(res => {
 		const item = res.item
+
+		if (item.state !== 'CA') return
+
 		const location = `${item.city}, ${item.state}`
 
 		if (!locationOptions.includes(location) && locationOptions.length < 10) {

@@ -34,7 +34,7 @@ import {
 export const FormSchema = z.object({
     keyword: z.string(),
     location: z.string(),
-    proximity: z.enum(['10','25','50','75','100','200','500'])
+    range: z.enum(['10','25','50','75','100','200','500'])
 })
 
 export type FormSchemaType = z.infer<typeof FormSchema>
@@ -55,7 +55,7 @@ export function Search({ searchHandler}: SearchProps) {
         defaultValues: {
             keyword: "",
             location: "",
-            proximity: "50"
+            range: "50"
         },
     })
 
@@ -150,7 +150,7 @@ export function Search({ searchHandler}: SearchProps) {
                         <div>
                         <FormField
                             control={form.control}
-                            name="proximity"
+                            name="range"
                             render={({ field }) => (
                                 <FormItem>
                                     <FormControl>
