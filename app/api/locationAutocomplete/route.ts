@@ -14,10 +14,6 @@ export async function GET(request: NextRequest) {
 
 	console.log(fuseResults?.[0])
 
-	if (!fuseResults || !fuseResults[0]?.score || fuseResults[0].score < 0.0001 && searchPattern.length >= 5) {
-		return Response.json([])
-	}
-
 	for (const res of fuseResults) {
 		
 		const item = res.item
