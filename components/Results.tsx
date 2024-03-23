@@ -35,7 +35,7 @@ export function Results({ listings }: { listings: ListingType[] }) {
                         width={1000}
                         height={1000}
                         alt=''
-                        className='object-contain w-[250px] h-[200px]'
+                        className='object-cover w-[250px] h-[200px]'
                     />                
                     <CardHeader>
                         <CardTitle>{make.toUpperCase()} {model.toUpperCase()} </CardTitle>
