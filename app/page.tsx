@@ -8,18 +8,26 @@ export default function Home() {
   const [listings, setListings] = useState<ListingType[]>([])
 
   const searchHandler = async (values: FormSchemaType) => {
-    const results = await fetch(`/api/search?` + new URLSearchParams({
+    const response = await fetch(`/api/search?` + new URLSearchParams({
       keyword: values.keyword,
       location: values.location,
       range: values.range
   }));
-    setListings(await results.json())
+    
+    if (response.ok) {
+      const results = await response.json()
+      setListings(results)
+    } else {
+      console.error(response.status)
+      setListings([])
+    }
+    
   }
 
 
   return (
-    <div className="flex justify-center items-center h-screen">
-      <div className="flex flex-col justify-center items-center w-full p-3">
+    <div className="flex justify-center items-center min-h-screen border-2">
+      <div className="flex flex-col justify-center items-center w-full p-3 gap-10">
         <Search searchHandler={searchHandler} />
         <Results listings={listings} />   
       </div>

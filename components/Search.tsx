@@ -1,4 +1,4 @@
-"use client"
+'use client'
 
 import { 
     useEffect, 
@@ -33,7 +33,9 @@ import {
 
 export const FormSchema = z.object({
     keyword: z.string(),
-    location: z.string(),
+    location: z.string().min(3, {
+        message: 'Please enter a city or ZIP to start your search from',
+      }),
     range: z.enum(['10','25','50','75','100','200','500'])
 })
 
@@ -68,8 +70,13 @@ export function Search({ searchHandler}: SearchProps) {
             }))
             const body = await res.json()
             locationOptionsRef.current = body
-            setLocationOptions(body)
-            setOpen(true)
+            console.log(body)
+            if (Array.isArray(body) && body.length > 0) {
+                setLocationOptions(body)
+                setOpen(true)
+            } else {
+                setOpen(false)
+            }
         }
        
         if (locationValue.length >= 3 && !locationOptionsRef.current.find(l => l.toLowerCase() === locationValue.toLowerCase())) {
@@ -121,10 +128,12 @@ export function Search({ searchHandler}: SearchProps) {
                                 render={({ field }) => (
                                     <FormItem>
                                         <FormControl>
-                                            <Input placeholder="ZIP or City, State" {...field} />
+                                            <Input autoComplete="postal-code" placeholder="ZIP or City, State" {...field} />
                                         </FormControl>
+                                        <FormMessage />
                                     </FormItem>
                                 )}
+                            
                             />
                             
                             {open ? (
@@ -145,6 +154,7 @@ export function Search({ searchHandler}: SearchProps) {
                                     ))}
                                 </CommandGroup>
                             </Command>) : null}
+                            
                             
                         </div>
                         <div>

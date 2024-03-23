@@ -1,35 +1,25 @@
 import Supabase from '@/lib/dbConfig';
 import { type NextRequest } from 'next/server'
-import locations from '@/public/USCities'
-import Fuse from 'fuse.js'
-
-const fuseOptions = {
-	includeScore: true,
-	includeMatches: true,
-	threshold: 0.4,
-	keys: [
-		"zipCode",
-		"city"
-	]
-};
-
-const fuse = new Fuse(locations, fuseOptions);
+import fuse from '@/lib/fuse'
 
 export async function GET(request: NextRequest) {
 
+    // Extract query params
     const searchParams = request.nextUrl.searchParams
 	const keyword = searchParams.get('keyword') || ''
     const location = searchParams.get('location')
     const range = milesToMeters(Number(searchParams.get('range')))
+
+    console.log('location', location)
 
     if (!location) return Response.json([]);
 
     // Find closest matching location
     const fuseResults = fuse
         .search(location)
-        .filter(res => res.item.state === 'CA')
+        .filter(res => res.item.state === 'California') // Limiting to california for now
 
-    console.log(fuseResults)
+    console.log('matched location', fuseResults)
 
     const match = fuseResults?.[0]
 
@@ -54,6 +44,7 @@ export async function GET(request: NextRequest) {
         range,
         keyword
     })
+    console.log('keyword length', keyword.length)
 
     const { data, error } = await Supabase.rpc('keyword_proximity_search', {
         x: coords.longitude,
@@ -62,11 +53,13 @@ export async function GET(request: NextRequest) {
         keyword
     })
 
+    // const { data, error } = await Supabase.rpc('test', {
+    //     keyword
+    // })
+
     if (error) {
         return new Response(null, { status: 500})
     }
-
-    console.log(data.slice(0,5))
 
 return Response.json(data)
 }
