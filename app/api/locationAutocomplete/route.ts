@@ -1,14 +1,18 @@
 import { type NextRequest } from 'next/server'
-import locations from '@/public/USCities'
 import fuse from '@/lib/fuse'
 
 export async function GET(request: NextRequest) {
 	const searchParams = request.nextUrl.searchParams
 	const searchPattern = searchParams.get('searchValue');
 
+	console.log('before fuze autocomplete:', new Date())
+
 	if (!searchPattern) return Response.json([]);
 
 	const fuseResults = fuse.search(searchPattern);
+
+	if (!fuseResults[0]?.score || fuseResults[0].score < 0.0001 && searchPattern.length >= 5) 
+		return Response.json([])
 
 	const locationOptions: string[] = []
 
@@ -28,7 +32,7 @@ export async function GET(request: NextRequest) {
 
 	};
 
-	console.log('after fuze search:', new Date())
+	console.log('after fuze autocomplete:', new Date())
 
 	return Response.json(locationOptions)
 }

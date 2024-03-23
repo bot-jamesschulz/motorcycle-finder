@@ -64,6 +64,7 @@ export function Search({ searchHandler}: SearchProps) {
     const locationValue = form.watch('location')
 
     useEffect(() => {
+        let ignore = false
         const handleAutocomplete = async () => {
             const res = await fetch(`api/locationAutocomplete?` + new URLSearchParams({
                 searchValue: locationValue
@@ -71,7 +72,7 @@ export function Search({ searchHandler}: SearchProps) {
             const body = await res.json()
             locationOptionsRef.current = body
             console.log(body)
-            if (Array.isArray(body) && body.length > 0) {
+            if (Array.isArray(body) && body.length > 0 && !ignore) {
                 setLocationOptions(body)
                 setOpen(true)
             } else {
@@ -84,6 +85,10 @@ export function Search({ searchHandler}: SearchProps) {
         } else {
             setOpen(false)
         }        
+
+        return () => {
+            ignore = true
+        }
     },[locationValue])
 
     useEffect(() => {

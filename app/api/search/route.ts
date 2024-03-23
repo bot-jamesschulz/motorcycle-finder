@@ -1,4 +1,4 @@
-import Supabase from '@/lib/dbConfig';
+import Supabase from '@/lib/dbConfig'
 import { type NextRequest } from 'next/server'
 import fuse from '@/lib/fuse'
 
@@ -10,20 +10,16 @@ export async function GET(request: NextRequest) {
     const location = searchParams.get('location')
     const range = milesToMeters(Number(searchParams.get('range')))
 
-    console.log('location', location)
-
     if (!location) return Response.json([]);
 
-    // Find closest matching location
-    const fuseResults = fuse
-        .search(location)
-        .filter(res => res.item.state === 'California') // Limiting to california for now
 
-    console.log('matched location', fuseResults)
+    // Find closest matching location
+    const fuseResults = fuse.search(location)
+
 
     const match = fuseResults?.[0]
 
-    if (!match) {
+    if (!match || match?.item?.state != 'California') {
         return Response.json('Location not found', {
             status: 404
         })
@@ -38,24 +34,12 @@ export async function GET(request: NextRequest) {
         return new Response(null, { status: 500})
     }
 
-    console.log('calling rpc with:', {
-        x: coords.longitude,
-        y: coords.latitude,
-        range,
-        keyword
-    })
-    console.log('keyword length', keyword.length)
-
     const { data, error } = await Supabase.rpc('keyword_proximity_search', {
         x: coords.longitude,
         y: coords.latitude,
         range,
         keyword
     })
-
-    // const { data, error } = await Supabase.rpc('test', {
-    //     keyword
-    // })
 
     if (error) {
         return new Response(null, { status: 500})
