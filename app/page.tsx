@@ -2,7 +2,7 @@
 
 import { FormSchemaType, Search } from '@/components/Search'
 import { useState } from 'react'
-import { Results, ListingType } from '@/components/Results'
+import { Results, NoResults, ListingType } from '@/components/Results'
 import { ThemeProvider } from '@/components/theme-provider'
 import { ModeToggle } from '@/components/ui/mode-toggle'
 import { LoaderCircle } from 'lucide-react'
@@ -22,8 +22,7 @@ export default function Home() {
     
     if (response.ok) {
       const results = await response.json()
-
-      if (listings.length) setLoadingState('loaded')
+      if (results.length) setLoadingState('loaded')
       else setLoadingState('no results')
 
       setListings(results)
@@ -58,7 +57,9 @@ export default function Home() {
                 </div>
               ) :
               (
-                <Results listings={listings} /> 
+                loadingState === 'no results' ? 
+                  <NoResults /> :
+                  <Results listings={listings} />
               )
             }
             

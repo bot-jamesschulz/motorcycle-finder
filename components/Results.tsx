@@ -54,3 +54,13 @@ export function Results({ listings }: { listings: ListingType[] }) {
 
 
 }
+
+export function NoResults() {
+    return (
+        <h4 className="scroll-m-20 text-xl font-semibold tracking-tight text-center">
+            <p>No listings found.</p>
+            <p className="text-sm text-muted-foreground">Try expanding your search radius.</p>
+        </h4>
+    )
+}
+
