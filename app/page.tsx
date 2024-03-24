@@ -3,6 +3,7 @@
 import { FormSchemaType, Search } from '@/components/Search'
 import { useState } from 'react'
 import { Results, NoResults, ListingType } from '@/components/Results'
+import { LocationMiss } from '@/components/LocationMiss'
 import { ThemeProvider } from '@/components/theme-provider'
 import { ModeToggle } from '@/components/ui/mode-toggle'
 import { LoaderCircle } from 'lucide-react'
@@ -19,7 +20,7 @@ export default function Home() {
       location: values.location,
       range: values.range
     }));
-    
+
     if (response.ok) {
       const results = await response.json()
       if (results.length) setLoadingState('loaded')
@@ -29,6 +30,7 @@ export default function Home() {
     } else {
       console.error(response.status)
       setListings([])
+      if (response.status === 404) setLoadingState('location not found')
     }
   }
 
@@ -45,28 +47,20 @@ export default function Home() {
             <ModeToggle />
           </div>
         </div>
-        <div className={`flex justify-center items-center ${!loadingState && `translate-y-[70%]`}  transition-all duration-1000 ease-in-out`}>
+        <div className={`flex justify-center items-center `}>
           <div className="flex flex-col justify-center items-center w-full p-3 gap-10">
-            <Search searchHandler={searchHandler} />
-            {loadingState === 'loading' ? 
-              (
-                <div className="relative animate-bounce">
-                  <Moto />
-                  <LoaderCircle className="absolute top-[3rem] right-[5.8rem] animate-spin duration-2000" strokeWidth={3} size={65} />
-                  <LoaderCircle className="absolute top-[3.4rem] left-[7.0rem] animate-spin duration-1750" strokeWidth={2.5} size={58} />
-                </div>
-              ) :
-              (
-                loadingState === 'no results' ? 
-                  <NoResults /> :
-                  <Results listings={listings} />
-              )
-            }
+              <div className={`${!loadingState && 'translate-y-[70%]'} relative transition-all duration-700 ease-in-out`}>
+                <Search searchHandler={searchHandler} />
+              </div>
+              <div className={`absolute top-2/3 pointer-events-none animate-bounce  ${loadingState === 'loading' ? 'opacity-1':  'opacity-0'}`}>
+                <Moto />
+                <LoaderCircle className="absolute top-[3rem] right-[5.8rem] animate-spin duration-2000" strokeWidth={3} size={65} />
+                <LoaderCircle className="absolute top-[3.4rem] left-[7.0rem] animate-spin duration-1750" strokeWidth={2.5} size={58} />
+              </div>
+              {loadingState === 'loaded' && <Results listings={listings} />}
+              {loadingState === 'no results' && <NoResults />}
+              {loadingState === 'location not found' && <LocationMiss />}
             
-
-            
-            
-              
           </div>
         </div>
       </ThemeProvider>

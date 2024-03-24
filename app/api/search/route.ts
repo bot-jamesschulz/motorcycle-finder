@@ -16,7 +16,6 @@ export async function GET(request: NextRequest) {
     // Find closest matching location
     const fuseResults = fuse.search(location)
 
-
     const match = fuseResults?.[0]
 
     if (!match || match?.item?.state != 'California') {
