@@ -1,5 +1,6 @@
 import { type NextRequest } from 'next/server'
 import fuse from '@/lib/fuse'
+const limitedStates = ['California']
 
 export async function GET(request: NextRequest) {
 	const searchParams = request.nextUrl.searchParams
@@ -11,18 +12,20 @@ export async function GET(request: NextRequest) {
 
 	const fuseResults = fuse.search(searchPattern);
 
-	if (!fuseResults[0]?.score || fuseResults[0].score < 0.0001 && searchPattern.length >= 5) 
-		return Response.json([])
-
 	const locationOptions: string[] = []
 
-	console.log(fuseResults?.[0])
 
 	for (const res of fuseResults) {
 		
 		const item = res.item
 
-		if (item.state !== 'California') continue
+		if (!limitedStates.includes(item.state) || !res.score || !res.matches) continue
+
+		if (res?.score < 0.0001 &&
+			res.matches[0].key === 'zipCode') {
+			console.log(res)
+			break
+		}
 
 		const location = `${item.city}, ${item.state}`
 
