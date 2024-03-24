@@ -47,15 +47,20 @@ export default function Home() {
             <ModeToggle />
           </div>
         </div>
-        <div className={`flex justify-center items-center `}>
+        <div className={`flex justify-center items-center`}>
           <div className="flex flex-col justify-center items-center w-full p-3 gap-10">
-              <div className={`${!loadingState && 'translate-y-[70%]'} relative transition-all duration-700 ease-in-out`}>
+              <div className={`${!loadingState && 'translate-y-[70%]'} relative transition-all duration-700 ease-in-out flex flex-col justify-center items-center gap-10`}>
+                
+                <div className='relative'>
                 <Search searchHandler={searchHandler} />
-              </div>
-              <div className={`absolute top-2/3 pointer-events-none animate-bounce  ${loadingState === 'loading' ? 'opacity-1':  'opacity-0'}`}>
-                <Moto />
-                <LoaderCircle className="absolute top-[3rem] right-[5.8rem] animate-spin duration-2000" strokeWidth={3} size={65} />
-                <LoaderCircle className="absolute top-[3.4rem] left-[7.0rem] animate-spin duration-1750" strokeWidth={2.5} size={58} />
+                <div className={`absolute left-1/2 transform -translate-x-1/2 pointer-events-none ${loadingState === 'loading' ? 'opacity-1':  'opacity-0'}`}>
+                  <div className='relative mt-10 min-w-56 animate-bounce'>
+                  <Moto />
+                  <LoaderCircle className="absolute top-[3rem] right-[8.3rem] animate-spin duration-2000" strokeWidth={3} size={65} />
+                  <LoaderCircle className="absolute top-[3.4rem] left-[9.4rem] animate-spin duration-1750" strokeWidth={2.5} size={58} />
+                  </div>
+                </div>
+                </div>
               </div>
               {loadingState === 'loaded' && <Results listings={listings} />}
               {loadingState === 'no results' && <NoResults />}
