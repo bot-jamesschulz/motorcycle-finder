@@ -62,17 +62,17 @@ export function Results({ listings, fetchListings, loadingState }:  SearchProps 
                             ? fetchTrigger
                             : null
                     }>
-                    <Card className='flex flex-col justify-start items-center overflow-hidden sm:flex-row sm:w-[600px] sm:h-[200px] sm:items-start' >
-                        <div className='w-[250px] h-[200px]'>
+                    <Card className='flex flex-col justify-start items-center overflow-hidden min-w-[300px] w-[300px] xs:w-[350px] sm:max-w-full sm:flex-row sm:w-[600px] sm:h-[200px] sm:items-start' >
+                        <div className='w-full sm:w-[250px] sm:h-[200px] flex justify-center items-center'>
                             <Image 
                                 src={imgSrc || ''}
                                 width={1000}
                                 height={1000}
                                 alt=''
-                                className='object-cover w-56 h-full rounded'
+                                className='object-cover w-full h-56 sm:w-56 sm:h-full rounded'
                             />    
                         </div>     
-                        <div className='grow h-full flex flex-col justify-between w-3/4'>       
+                        <div className='grow h-full flex flex-col justify-between w-full sm:w-3/4'>       
                             <CardHeader className='w-full'>
                                 <CardTitle className='flex justify-between'><span>{make.toUpperCase()} {model?.toUpperCase()}</span><span className='font-normal leading-none tracking-tight'>{formattedPrice}</span></CardTitle>
                                 <CardDescription className='flex justify-between text-md'><span>{year}</span><span>{conditionFinal}</span></CardDescription>

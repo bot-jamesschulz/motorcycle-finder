@@ -18,6 +18,9 @@ const config = {
       },
     },
     extend: {
+      screens: {
+        "xs": "375px",
+      },
       transitionDuration: {
         '2000': '1500ms',
         '1750': '1250ms'
