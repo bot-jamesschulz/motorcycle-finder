@@ -39,11 +39,11 @@ export const FormSchema = z.object({
     range: z.enum(['10','25','50','75','100','200','500'])
 })
 
-export type FormSchemaType = z.infer<typeof FormSchema>
+export type SearchFormSchemaType = z.infer<typeof FormSchema>
 
 
 type SearchProps = {
-    searchHandler: SubmitHandler<FormSchemaType>
+    searchHandler: SubmitHandler<SearchFormSchemaType>
 }
 
 export function Search({ searchHandler}: SearchProps) {
@@ -52,7 +52,7 @@ export function Search({ searchHandler}: SearchProps) {
     const [locationOptions, setLocationOptions ] = useState<string[]>([])
     const selectRef = useRef<HTMLDivElement>(null)
     
-    const form = useForm<FormSchemaType>({
+    const form = useForm<SearchFormSchemaType>({
         resolver: zodResolver(FormSchema),
         defaultValues: {
             keyword: "",
