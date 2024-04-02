@@ -41,7 +41,7 @@ type SearchResponsePayload = {
 type FetchOptions = {
   reset: boolean
 }
-export const defaultSort: SortMethod = 'Relevance'
+const defaultSort: SortMethod = 'Relevance'
 
 export default function Home() {
   
