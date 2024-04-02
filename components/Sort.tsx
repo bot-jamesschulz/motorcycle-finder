@@ -22,11 +22,9 @@ export function Sort({ setSortMethod, sortMethod,className }: SortProps) {
 
     return (
         <div className={className}>
-            <Select onValueChange={valueChangeHandler}>
-                <SelectTrigger className="w-full text-sm">
-                    <SelectValue asChild={true} placeholder={`Sort By: ${sortMethod}`} >
-                        <span>Sorted By: {sortMethod}</span>
-                    </SelectValue>
+            <Select onValueChange={valueChangeHandler} >
+                <SelectTrigger className=''>
+                    <SelectValue placeholder={`Sort By: ${sortMethod}`} />
                 </SelectTrigger>
                 <SelectContent>
                     <SelectItem value="Relevance">Relevance</SelectItem>

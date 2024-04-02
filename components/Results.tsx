@@ -63,9 +63,6 @@ export function Results({ listings, fetchListings, loadingState }:  SearchProps 
                         condition.charAt(0).toUpperCase() + condition.slice(1)
                     const milesConversionFactor = 0.0006213712;
                     const distanceInMiles = distance * milesConversionFactor;
-                    const dealerNameWords = dealerName.split(' ');
-                    const dealerNameTrunc = dealerNameWords?.slice(0,3).map(word => word + ' ').join('').trim();
-                    const dealerNameFinal = dealerNameWords.length < 3 ? dealerNameTrunc : dealerNameTrunc + '...'
 
                     return (
                         <>  
@@ -101,9 +98,9 @@ export function Results({ listings, fetchListings, loadingState }:  SearchProps 
                                             </div>               
                                         <div className='flex justify-between items-end text-slate-500'>
                                             <div className='flex gap-1 self-start'>
-                                                <Ruler className='text-slate-800 self-center' size={15} strokeWidth={2}/>{distanceInMiles?.toFixed(2)} miles away
+                                                <Ruler className='text-slate-800 self-center' size={15} strokeWidth={2}/>{Math.trunc(distanceInMiles)} miles away
                                             </div>
-                                            <div className=' text-xs text-right w-36 text-slate-400 font-light'>{dealerNameFinal}</div>
+                                            <div className=' text-xs truncate text-right w-36 text-slate-400 font-light'>{dealerName}</div>
                                         </div>
                                     </CardContent> 
                                 </div>         
