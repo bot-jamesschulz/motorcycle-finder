@@ -1,7 +1,7 @@
 'use client'
-import { useRef, useCallback } from 'react'
+import { useRef, useCallback, useState } from 'react'
 import Image from 'next/image'
-import { Loading } from '@/app/page'
+import { Loading, ListingsRow } from '@/app/page'
 import {
   Card,
   CardContent,
@@ -10,16 +10,15 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import type { Database } from '@/lib/database.types';
 import { MapPin, Gauge, Ruler } from 'lucide-react';
-
-export type ListingsRow = Database['public']['Functions']['keyword_proximity_search']['Returns'];
 
 type SearchProps = {
     listings: ListingsRow[]
     fetchListings: () => Promise<void>
     loadingState: Loading
 }
+
+export const bestMatchThreshold = 1.1
 
 export function Results({ listings, fetchListings, loadingState }:  SearchProps ) {
     const observer = useRef<IntersectionObserver>()
@@ -36,69 +35,86 @@ export function Results({ listings, fetchListings, loadingState }:  SearchProps 
         })
         observer.current.observe(node)
 
-    },[fetchListings, loadingState])
+    }, [fetchListings, loadingState])
 
     return (
-    <div className='flex flex-wrap justify-center items-center gap-5 max-w-screen-xl'>
-        {listings.length > 0 ? 
-            listings?.map(({ make, model, year, price, mileage, condition, detailsUrl, imgSrc, distance, city, dealerName}, index) => {
-                const formattedPrice = price?.toLocaleString('en-US', {
-                    style: 'currency',
-                    currency: 'USD',
-                    minimumFractionDigits: 0
-                })
-                const formattedMileage = mileage?.toLocaleString()
-                const conditionFinal = condition &&
-                    condition.charAt(0).toUpperCase() + condition.slice(1)
-                const milesConversionFactor = 0.0006213712;
-                const distanceInMiles = distance * milesConversionFactor;
-                const dealerNameWords = dealerName.split(' ');
-                const dealerNameTrunc = dealerNameWords?.slice(0,3).map(word => word + ' ').join('').trim();
-                const dealerNameFinal = dealerNameWords.length < 3 ? dealerNameTrunc : dealerNameTrunc + '...'
+    <div className='flex flex-col justify-center items-center gap-4'>
+        {listings.length && (
+            <h4 className="scroll-m-20 my-8 text-xl font-semibold tracking-tight">
+                {listings[0].matchScore >= bestMatchThreshold 
+                    ? 'Best Matches'
+                    : 'Possible Matches'
 
-                return (
-                    <a key={detailsUrl} href={detailsUrl} rel='external' target='_blank' ref={
-                        index === listings.length - 4  
-                            ? fetchTrigger
-                            : null
-                    }>
-                    <Card className='flex flex-col justify-start items-center overflow-hidden min-w-[300px] w-[300px] xs:w-[350px] sm:max-w-full sm:flex-row sm:w-[600px] sm:h-[200px] sm:items-start' >
-                        <div className='w-full sm:w-[250px] sm:h-[200px] flex justify-center items-center'>
-                            <Image 
-                                src={imgSrc || ''}
-                                width={1000}
-                                height={1000}
-                                alt=''
-                                className='object-cover w-full h-56 sm:w-56 sm:h-full rounded'
-                            />    
-                        </div>     
-                        <div className='grow h-full flex flex-col justify-between w-full sm:w-3/4'>       
-                            <CardHeader className='w-full'>
-                                <CardTitle className='flex justify-between'><span>{make.toUpperCase()} {model?.toUpperCase()}</span><span className='font-normal leading-none tracking-tight'>{formattedPrice}</span></CardTitle>
-                                <CardDescription className='flex justify-between text-md'><span>{year}</span><span>{conditionFinal}</span></CardDescription>
-                            </CardHeader>   
-                            <CardContent className='flex flex-col gap-1 text-slate-600 text-sm'>
-                                {mileage && conditionFinal === 'Used' &&
-                                    <div className='flex items-center gap-1'>
-                                        <Gauge className='text-slate-800 self-center' size={15} strokeWidth={2}/><span className='font-normal'>{formattedMileage} miles</span>
-                                    </div>}   
-                                    <div className='flex gap-1  text-slate-500'>
-                                        <MapPin className='text-slate-800 self-center' size={15} strokeWidth={1.5}/> {city}
-                                    </div>               
-                                <div className='flex justify-between items-end text-slate-500'>
-                                    <div className='flex gap-1 self-start'>
-                                        <Ruler className='text-slate-800 self-center' size={15} strokeWidth={2}/>{distanceInMiles?.toFixed(2)} miles away
-                                    </div>
-                                    <div className=' text-xs text-right w-36 text-slate-400 font-light'>{dealerNameFinal}</div>
-                                </div>
-                            </CardContent> 
-                        </div>         
-                    </Card>
-                    </a>
-                )})
-            : null
-        }
+                }
+            </h4>
+        )}
+            
+        <div className='flex flex-wrap justify-center items-center gap-5 max-w-screen-xl'>
+            {listings.length ? 
+                listings?.map(({ make, model, year, price, mileage, condition, detailsUrl, imgSrc, distance, city, dealerName, matchScore}, index) => {
+                    
+                    const formattedPrice = price?.toLocaleString('en-US', {
+                        style: 'currency',
+                        currency: 'USD',
+                        minimumFractionDigits: 0
+                    })
+                    const formattedMileage = mileage?.toLocaleString()
+                    const conditionFinal = condition &&
+                        condition.charAt(0).toUpperCase() + condition.slice(1)
+                    const milesConversionFactor = 0.0006213712;
+                    const distanceInMiles = distance * milesConversionFactor;
+                    const dealerNameWords = dealerName.split(' ');
+                    const dealerNameTrunc = dealerNameWords?.slice(0,3).map(word => word + ' ').join('').trim();
+                    const dealerNameFinal = dealerNameWords.length < 3 ? dealerNameTrunc : dealerNameTrunc + '...'
 
+                    return (
+                        <>  
+                            {(listings[index-1]?.matchScore >= bestMatchThreshold) &&
+                            matchScore < bestMatchThreshold && <h4 className="scroll-m-20 m-24 text-xl font-semibold tracking-tight">Possible Matches</h4>}
+                            <a key={detailsUrl} href={detailsUrl} rel='external' target='_blank' ref={
+                                index === listings.length - 4  
+                                    ? fetchTrigger
+                                    : null
+                            }>
+                            <Card className='flex flex-col justify-start items-center overflow-hidden min-w-[300px] w-[300px] xs:w-[350px] sm:min-w-full sm:max-w-full sm:flex-row sm:w-[600px] sm:h-[200px] sm:items-start' >
+                                <div className='w-full sm:w-[250px] sm:h-[200px] flex justify-center items-center'>
+                                    <Image 
+                                        src={imgSrc || ''}
+                                        width={1000}
+                                        height={1000}
+                                        alt=''
+                                        className='object-cover w-full h-56 sm:w-56 sm:h-full rounded'
+                                    />    
+                                </div>     
+                                <div className='grow h-full flex flex-col justify-between w-full sm:w-3/4'>       
+                                    <CardHeader className='w-full'>
+                                        <CardTitle className='flex justify-between gap-4'><span>{make.toUpperCase()} {model?.toUpperCase()}</span><span className='font-normal leading-none tracking-tight'>{formattedPrice}</span></CardTitle>
+                                        <CardDescription className='flex justify-between text-md'><span>{year}</span><span>{conditionFinal}</span></CardDescription>
+                                    </CardHeader>   
+                                    <CardContent className='flex flex-col gap-1 text-slate-600 text-sm'>
+                                        {mileage && conditionFinal === 'Used' &&
+                                            <div className='flex items-center gap-1'>
+                                                <Gauge className='text-slate-800 self-center' size={15} strokeWidth={2}/><span className='font-normal'>{formattedMileage} miles</span>
+                                            </div>}   
+                                            <div className='flex gap-1  text-slate-500'>
+                                                <MapPin className='text-slate-800 self-center' size={15} strokeWidth={1.5}/> {city}
+                                            </div>               
+                                        <div className='flex justify-between items-end text-slate-500'>
+                                            <div className='flex gap-1 self-start'>
+                                                <Ruler className='text-slate-800 self-center' size={15} strokeWidth={2}/>{distanceInMiles?.toFixed(2)} miles away
+                                            </div>
+                                            <div className=' text-xs text-right w-36 text-slate-400 font-light'>{dealerNameFinal}</div>
+                                        </div>
+                                    </CardContent> 
+                                </div>         
+                            </Card>
+                            </a>
+                        </>
+                    )})
+                : null
+            }
+
+        </div>
     </div>
     )
 

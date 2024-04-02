@@ -1,5 +1,6 @@
 import Supabase from '@/lib/dbConfig'
 import { type NextRequest } from 'next/server'
+import { SortMethod } from '@/components/Sort'
 
 export async function GET(request: NextRequest) {
 
@@ -10,6 +11,7 @@ export async function GET(request: NextRequest) {
     const y = Number(searchParams.get('y'))
     const range = Number(searchParams.get('range'))
     const pageNum = Number(searchParams.get('pageNum'))
+    const sortMethod: SortMethod = searchParams.get('sortMethod') as SortMethod
 
     if (!x || !y || !range) return Response.json([]);
 
@@ -22,8 +24,11 @@ export async function GET(request: NextRequest) {
         y,
         range,
         keyword,
-        pageNum
+        pageNum,
+        sortMethod
     }
+
+    console.log('query fetchListings', query)
 
     const { data, error } = await Supabase.rpc('keyword_proximity_search', query)
 

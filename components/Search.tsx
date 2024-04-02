@@ -3,12 +3,19 @@
 import { 
     useEffect, 
     useState,
-    useRef
+    useRef,
+    Dispatch, 
+    SetStateAction
 } from "react"
 import { SubmitHandler } from "react-hook-form"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
+import { Loading } from '@/app/page'
+import { 
+    Sort, 
+    SortMethod 
+} from '@/components/Sort'
 import { Input } from "@/components/ui/input"
 import {
   Select,
@@ -44,9 +51,17 @@ export type SearchFormSchemaType = z.infer<typeof FormSchema>
 
 type SearchProps = {
     searchHandler: SubmitHandler<SearchFormSchemaType>
+    setSortMethod: Dispatch<SetStateAction<SortMethod>>
+    sortMethod: SortMethod
+    loadingState: Loading
 }
 
-export function Search({ searchHandler}: SearchProps) {
+export function Search({ 
+        searchHandler, 
+        setSortMethod, 
+        sortMethod, 
+        loadingState
+    }: SearchProps) {
     const [open, setOpen] = useState(false)
     const locationOptionsRef = useRef<string[]>([])
     const [locationOptions, setLocationOptions ] = useState<string[]>([])
@@ -63,6 +78,7 @@ export function Search({ searchHandler}: SearchProps) {
 
     const locationValue = form.watch('location')
 
+    // Autocomplete
     useEffect(() => {
         let ignore = false
         const handleAutocomplete = async () => {
@@ -91,6 +107,7 @@ export function Search({ searchHandler}: SearchProps) {
         }
     },[locationValue])
 
+    // Closing of the autocomplete drop down
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
 
@@ -107,9 +124,9 @@ export function Search({ searchHandler}: SearchProps) {
     }, [open]);
 
     return  (
-        <Form {...form} >
+        <Form {...form}>
             <form onSubmit={form.handleSubmit(searchHandler)} className="flex flex-col gap-5 w-full">
-                <div className="flex flex-col gap-5 w-full h-1/2 max-w-lg">
+                <div className="flex flex-col gap-5 w-full h-1/2 max-w-2xl">
                 <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl">Find your next motorcycle.</h1>
                     <div className="w-full">
                         <FormField
@@ -188,8 +205,15 @@ export function Search({ searchHandler}: SearchProps) {
                             )}
                         />
                         </div>
-                        </div>
-                    <Button className="self-center" type="submit">Search</Button>
+                    </div>
+                    <div className={`flex ${loadingState === 'loaded' ? 'justify-between' : 'justify-center'} content-center gap-2`}>
+                        { loadingState === 'loaded' && <div className='self-center grow basis-0'>Fliter Placeholder</div> }
+                        <Button className="self-center mx-auto" type="submit">Search</Button>
+                        { loadingState === 'loaded' && <Sort className='self-center grow basis-0' 
+                                                            setSortMethod={setSortMethod} 
+                                                            sortMethod={sortMethod}
+                                                        /> }
+                    </div>
                 </div>
             </form>
         </Form>

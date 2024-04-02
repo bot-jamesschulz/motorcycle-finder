@@ -1,6 +1,7 @@
 import Supabase from '@/lib/dbConfig'
 import { type NextRequest } from 'next/server'
 import fuse from '@/lib/fuse'
+import { SortMethod } from '@/components/Sort'
 
 export async function GET(request: NextRequest) {
 
@@ -9,6 +10,7 @@ export async function GET(request: NextRequest) {
 	const keyword = searchParams.get('keyword') || ''
     const location = searchParams.get('location')
     const range = Number(searchParams.get('range'))
+    const sortMethod: SortMethod = searchParams.get('sortMethod') as SortMethod
 
     if (!location) return Response.json([]);
 
@@ -37,7 +39,10 @@ export async function GET(request: NextRequest) {
         y: coords.latitude,
         range,
         keyword,
+        sortMethod
     }
+
+    console.log('query search', query)
 
     const { data, error } = await Supabase.rpc('keyword_proximity_search', query)
 
