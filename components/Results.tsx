@@ -70,7 +70,7 @@ export function Results({ listings, fetchListings, loadingState }:  SearchProps 
                     return (
                         <>  
                             {(listings[index-1]?.matchScore >= bestMatchThreshold) &&
-                            matchScore < bestMatchThreshold && <h4 className="scroll-m-20 m-24 text-xl font-semibold tracking-tight">Possible Matches</h4>}
+                            matchScore < bestMatchThreshold && <h4 className="w-full text-center scroll-m-20 m-24 text-xl font-semibold tracking-tight">Possible Matches</h4>}
                             <a key={detailsUrl} href={detailsUrl} rel='external' target='_blank' ref={
                                 index === listings.length - 4  
                                     ? fetchTrigger
