@@ -65,10 +65,10 @@ export function Results({ listings, fetchListings, loadingState }:  SearchProps 
                     const distanceInMiles = distance * milesConversionFactor;
 
                     return (
-                        <>  
+                        <div key={detailsUrl}>  
                             {(listings[index-1]?.matchScore >= bestMatchThreshold) &&
                             matchScore < bestMatchThreshold && <h4 className="w-full text-center scroll-m-20 m-24 text-xl font-semibold tracking-tight">Possible Matches</h4>}
-                            <a key={detailsUrl} href={detailsUrl} rel='external' target='_blank' ref={
+                            <a  href={detailsUrl} rel='external' target='_blank' ref={
                                 index === listings.length - 4  
                                     ? fetchTrigger
                                     : null
@@ -106,7 +106,7 @@ export function Results({ listings, fetchListings, loadingState }:  SearchProps 
                                 </div>         
                             </Card>
                             </a>
-                        </>
+                        </div>
                     )})
                 : null
             }

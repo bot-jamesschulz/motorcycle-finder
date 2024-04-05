@@ -2,7 +2,9 @@
 
 import { 
   SearchFormSchemaType, 
-  Search 
+  Search,
+  defaultSort,
+  defaultPosition
 } from '@/components/Search'
 import { 
   useState, 
@@ -14,7 +16,7 @@ import {
   Results, 
   NoResults
 } from '@/components/Results'
-import { SortMethod } from '@/components/Sort'
+import type { SortMethod } from '@/components/Sort'
 import { LocationMiss } from '@/components/LocationMiss'
 import { ThemeProvider } from '@/components/theme-provider'
 import LoadingIcon from '@/components/LoadingIcon'
@@ -22,30 +24,32 @@ import { ModeToggle } from '@/components/ui/mode-toggle'
 import { milesToMeters } from '@/lib/utils'
 import { Database } from '@/lib/database.types'
 
-
 export type Loading = 'loading' | 'loaded' | 'no results' |'location not found' | undefined
 export type ListingsRow = Database['public']['Functions']['keyword_proximity_search']['Returns']
-type Query = {
+export type Range = SearchFormSchemaType['range']
+export type Position = {
   x: number
   y: number
-  range: number
+  range: Range
+}
+type Query = {
   keyword: string
   pageNum: number
   endOfListings: boolean
   sortMethod: SortMethod
-}
+} & Position
 type SearchResponsePayload = {
   data: ListingsRow[]
   query: Query
 }
-type FetchOptions = {
+export type FetchOptions = {
   reset: boolean
 }
-const defaultSort: SortMethod = 'Relevance'
 
 export default function Home() {
   
   const [listings, setListings] = useState<ListingsRow[]>([])
+  const [position, setPosition] = useState<Position>(defaultPosition)
   const [loadingState, setLoadingState] = useState<Loading>() // If results are found or not
   const [sortMethod, setSortMethod] = useState<SortMethod>(defaultSort)
   const queryRef = useRef<Query>()
@@ -53,21 +57,20 @@ export default function Home() {
   // New listings for infinite scroll
   const fetchListings = useCallback(async (options: FetchOptions = { reset: false }) => {  
     if (!queryRef.current) return
-
     
     if (options.reset) {
       queryRef.current.pageNum = 0
     } else {
       queryRef.current.pageNum++
     }
-    const currQuery = queryRef.current
+    const currQuery: Query = queryRef.current
 
     if (currQuery.endOfListings) return
   
     const response = await fetch(`/api/fetchListings?` + new URLSearchParams({
       x: currQuery.x.toString(),
       y: currQuery.y.toString(),
-      range: currQuery.range.toString(),
+      range: milesToMeters(position.range),
       keyword: currQuery.keyword,
       pageNum: currQuery.pageNum.toString(),
       sortMethod
@@ -76,9 +79,12 @@ export default function Home() {
     if (!response.ok) return
 
     const { data }: SearchResponsePayload = await response.json()
+    
     setLoadingState('loaded')
-    if (!data.length) {
-      queryRef.current.endOfListings = true
+
+    if (!data?.length) {
+      if (options.reset) setLoadingState('no results')
+      else queryRef.current.endOfListings = true
       return
     }
 
@@ -88,22 +94,24 @@ export default function Home() {
       setListings((prev) => prev.concat(data))
     }
 
+  },[sortMethod, position])
 
-  },[sortMethod])
-
+  // Listings fetch trigger for sort and range changes
   useEffect(() => {
-    
     if (!queryRef.current) return
     setLoadingState('loading')
     fetchListings({ reset: true })
 
-  },[sortMethod, fetchListings])
+  },[sortMethod, fetchListings, position.range])
+
 
   // Initial search request
   const searchHandler = async (values: SearchFormSchemaType) => {
     const { keyword, location, range } = values
 
     const rangeMeters = milesToMeters(range).toString()
+
+    console.log('rangeMeters', rangeMeters)
 
     setLoadingState('loading')
 
@@ -114,15 +122,25 @@ export default function Home() {
       sortMethod
     }));
 
+    const { data, query }: SearchResponsePayload = await response.json()
+
+    setPosition((prev) => ({
+      x: query.x,
+      y: query.y,
+      range: prev.range
+    }))
+
     if (response.ok) {
-      const { data, query }: SearchResponsePayload = await response.json()
-      if (data.length) {
+
+      if (data?.length) {
         setLoadingState('loaded')
         setListings(data)
+
         queryRef.current = {
           ...query, 
           pageNum: 0
         }
+
       }
       else {
         setLoadingState('no results')
@@ -132,8 +150,6 @@ export default function Home() {
       if (response.status === 404) setLoadingState('location not found')
     }
   }
-
-  console.log(listings.map(el => ({score: el.matchScore, model: el.model})))
 
   return (
     <body >
@@ -158,6 +174,9 @@ export default function Home() {
                   setSortMethod={setSortMethod} 
                   sortMethod={sortMethod} 
                   loadingState={loadingState} 
+                  position={position}
+                  setPosition={setPosition}
+                  fetchListings={fetchListings}
                 />
                 <LoadingIcon loadingState={loadingState}/>
                 </div>

@@ -1,3 +1,5 @@
+'use client'
+
 import { Dispatch, SetStateAction } from 'react'
 import {
     Select,
@@ -5,7 +7,8 @@ import {
     SelectItem,
     SelectTrigger,
     SelectValue,
-  } from "@/components/ui/select"
+} from "@/components/ui/select"
+import { ArrowDownWideNarrow } from 'lucide-react';
 
 export type SortMethod = 'Relevance' | 'Nearest' | 'Highest Price' | 'Lowest Price' 
 type SortProps = {
@@ -21,10 +24,11 @@ export function Sort({ setSortMethod, sortMethod,className }: SortProps) {
     }
 
     return (
-        <div className={className}>
-            <Select onValueChange={valueChangeHandler} >
-                <SelectTrigger className=''>
-                    <SelectValue placeholder={`Sort By: ${sortMethod}`} />
+        <div className={`${className} flex justify-center items-center gap-2`}>
+            <ArrowDownWideNarrow strokeWidth={1.75} size={20} className='min-w-5'/>
+            <Select onValueChange={valueChangeHandler}>
+                <SelectTrigger className='border-none text-base text-left pl-0 max-w-52 min-w-[95px]'>
+                    <SelectValue placeholder={<span>Sort By <span className='font-semibold'>{sortMethod}</span></span>} />
                 </SelectTrigger>
                 <SelectContent>
                     <SelectItem value="Relevance">Relevance</SelectItem>

@@ -3,12 +3,16 @@ import { type NextRequest } from 'next/server'
 import fuse from '@/lib/fuse'
 import { SortMethod } from '@/components/Sort'
 
+const defaultZip = '93654'
+
 export async function GET(request: NextRequest) {
 
     // Extract query params
     const searchParams = request.nextUrl.searchParams
 	const keyword = searchParams.get('keyword') || ''
-    const location = searchParams.get('location')
+    const location = searchParams.get('location') === '' 
+        ? defaultZip 
+        : searchParams.get('location')
     const range = Number(searchParams.get('range'))
     const sortMethod: SortMethod = searchParams.get('sortMethod') as SortMethod
 
@@ -45,7 +49,7 @@ export async function GET(request: NextRequest) {
     console.log('query search', query)
 
     const { data, error } = await Supabase.rpc('keyword_proximity_search', query)
-
+    
     if (error) {
         return new Response(null, { status: 500})
     }

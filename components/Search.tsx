@@ -1,21 +1,30 @@
 'use client'
 
+import { createClient } from '@supabase/supabase-js';
 import { 
     useEffect, 
     useState,
     useRef,
-    Dispatch, 
-    SetStateAction
+    type Dispatch, 
+    type SetStateAction
 } from "react"
+import { milesToMeters } from '@/lib/utils'
+import { Database } from '@/lib/database.types'
 import { SubmitHandler } from "react-hook-form"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
-import { Loading } from '@/app/page'
+import type { 
+    Loading,
+    Position,
+    Range,
+    FetchOptions
+ } from '@/app/page'
 import { 
     Sort, 
-    SortMethod 
+    type SortMethod 
 } from '@/components/Sort'
+import { Filter } from '@/components/Filter'
 import { Input } from "@/components/ui/input"
 import {
   Select,
@@ -30,7 +39,7 @@ import {
     FormField,
     FormItem,
     FormMessage,
-  } from "@/components/ui/form"
+} from "@/components/ui/form"
 import { Button } from "@/components/ui/button"
 import {
     Command,
@@ -38,31 +47,52 @@ import {
     CommandItem,
 } from "@/components/ui/command"
 
-export const FormSchema = z.object({
-    keyword: z.string(),
-    location: z.string().min(3, {
-        message: 'Please enter a city or ZIP to start your search from',
-      }),
-    range: z.enum(['10','25','50','75','100','200','500'])
-})
-
+export type MakeCounts = Database['public']['Functions']['make_count_in_range']['Returns']
+export type MakeCount = MakeCounts[0]
 export type SearchFormSchemaType = z.infer<typeof FormSchema>
-
 
 type SearchProps = {
     searchHandler: SubmitHandler<SearchFormSchemaType>
-    setSortMethod: Dispatch<SetStateAction<SortMethod>>
     sortMethod: SortMethod
+    setSortMethod: Dispatch<SetStateAction<SortMethod>>
     loadingState: Loading
+    position: Position
+    setPosition: Dispatch<SetStateAction<Position>>
+    fetchListings: (options?: FetchOptions) => Promise<void>
 }
+
+
+
+export const FormSchema = z.object({
+    keyword: z.string(),
+    location: z.string(),
+    range: z.enum(['10','25','50','75','100','200','500'])
+})
+
+export const defaultRange: Range = "500"
+export const defaultPosition: Position = {
+    x: -119.401274,
+    y: 36.658709,
+    range: defaultRange
+}
+export const defaultSort: SortMethod = 'Relevance'
+
+let Supabase = createClient<Database>(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
 
 export function Search({ 
         searchHandler, 
+        sortMethod,
         setSortMethod, 
-        sortMethod, 
-        loadingState
+        loadingState,
+        position,
+        setPosition,
+        fetchListings
     }: SearchProps) {
     const [open, setOpen] = useState(false)
+    const [makesInRange, setMakesInRange] = useState<MakeCount[]>([])
     const locationOptionsRef = useRef<string[]>([])
     const [locationOptions, setLocationOptions ] = useState<string[]>([])
     const selectRef = useRef<HTMLDivElement>(null)
@@ -72,7 +102,7 @@ export function Search({
         defaultValues: {
             keyword: "",
             location: "",
-            range: "50"
+            range: defaultRange
         },
     })
 
@@ -87,8 +117,7 @@ export function Search({
             }))
             const body = await res.json()
             locationOptionsRef.current = body
-            console.log(body)
-            if (Array.isArray(body) && body.length > 0 && !ignore) {
+            if (Array.isArray(body) && body.length && !ignore) {
                 setLocationOptions(body)
                 setOpen(true)
             } else {
@@ -123,6 +152,35 @@ export function Search({
         };
     }, [open]);
 
+    // Get make counts
+    useEffect( () => {
+        const fetchData = async () => {
+            console.log('start of fetch', position)
+            if (!Supabase) return
+            const { data, error } = await Supabase.rpc('make_count_in_range', {
+                ...position,
+                range: Number(milesToMeters(position.range))
+            })
+            if (error) return
+            if (!data?.length) return
+            setMakesInRange(data)
+            
+            
+        }
+        fetchData()
+        
+    }, [position])
+
+    console.log('makes', makesInRange)
+
+    const rangeChangeHandler = (range: Range) => {
+        
+        setPosition((prev: Position) => ({
+            ...prev, 
+            range: range
+        }))
+    }
+
     return  (
         <Form {...form}>
             <form onSubmit={form.handleSubmit(searchHandler)} className="flex flex-col gap-5 w-full">
@@ -135,7 +193,7 @@ export function Search({
                             render={({ field }) => (
                                 <FormItem>
                                     <FormControl>
-                                        <Input placeholder="Search by keyword" {...field} />
+                                        <Input placeholder="Search by Keyword (e.g. Yamaha R6)" {...field} />
                                     </FormControl>
                                 <FormMessage />
                                 </FormItem>
@@ -165,7 +223,7 @@ export function Search({
                                     <CommandItem
                                         key={index}
                                         value={location}
-                                        onSelect={(currentValue) => {
+                                        onSelect={() => {
                                         form.setValue('location', location)
                                         setOpen(false)
                                         }}
@@ -186,9 +244,9 @@ export function Search({
                             render={({ field }) => (
                                 <FormItem>
                                     <FormControl>
-                                        <Select onValueChange={field.onChange}>
+                                        <Select onValueChange={rangeChangeHandler}>
                                             <SelectTrigger className="w-[100px]">
-                                                <SelectValue placeholder="50 mi." />
+                                                <SelectValue placeholder={`${defaultRange} mi.`} />
                                             </SelectTrigger>
                                             <SelectContent>
                                                 <SelectItem value="10">10 mi.</SelectItem>
@@ -206,13 +264,18 @@ export function Search({
                         />
                         </div>
                     </div>
-                    <div className={`flex ${loadingState === 'loaded' ? 'justify-between' : 'justify-center'} content-center gap-2`}>
-                        { loadingState === 'loaded' && <div className='self-center grow basis-0'>Fliter Placeholder</div> }
-                        <Button className="self-center mx-auto" type="submit">Search</Button>
-                        { loadingState === 'loaded' && <Sort className='self-center grow basis-0' 
-                                                            setSortMethod={setSortMethod} 
-                                                            sortMethod={sortMethod}
-                                                        /> }
+                    <div className={`flex ${loadingState === 'loaded' ? 'justify-start' : 'justify-center'} content-center gap-2`}>
+                    <Button className="self-center h-9 w-1/4" type="submit">Search</Button>
+                        { loadingState && 
+                            <div className='flex items-center max-w-40 justify-between h-9 py-2 px-4 self-center grow basis-0 cursor-pointer'>
+                                <Filter makesInRange={makesInRange} fetchListings={fetchListings}/>
+                            </div>                     
+                       }
+                        { loadingState && 'loaded' && 
+                            <Sort className='self-center grow basis-0' 
+                            setSortMethod={setSortMethod} 
+                            sortMethod={sortMethod}
+                        />}
                     </div>
                 </div>
             </form>
