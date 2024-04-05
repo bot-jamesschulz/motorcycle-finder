@@ -1,6 +1,8 @@
 'use client'
 
-import { useCallback } from 'react'
+import { 
+    useCallback
+} from 'react'
 import {
     Sheet,
     SheetContent,
@@ -16,32 +18,42 @@ import {
     type Option,
     MultiSelect
 } from '@/components/ui/multi-select'
-import type { FetchOptions } from '@/app/page'
+import type { 
+    Query,
+    SetQuery 
+} from '@/app/page'
 import {
     Accordion,
     AccordionContent,
     AccordionItem,
     AccordionTrigger,
-  } from "@/components/ui/accordion"
+} from "@/components/ui/accordion"
 
 type FilterProps = {
     makesInRange: MakeCounts
-    fetchListings: (options?: FetchOptions) => Promise<void>
+    setQuery: SetQuery
 }
 
 
-export function Filter({ makesInRange, fetchListings }: FilterProps) {
+export function Filter({ makesInRange, setQuery}: FilterProps) {
     
     const optionsChangeHandler = useCallback((selected: Option[], classification: Classification) => {
         switch (classification) {
             case 'makes':
                 console.log('makes', selected)
+                setQuery((prev) => ({
+                    ...prev,
+                    filters: {
+                        ...prev.filters,
+                        makes: selected.map(el => el.value)
+                    }
+                }))
                 break
             case 'models':
                 console.log('models', selected)
                 break
         }
-    },[])
+    },[setQuery])
 
     const makeOptions = makesInRange.map((make) => ({
         value: make.make,

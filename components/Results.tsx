@@ -1,7 +1,16 @@
 'use client'
-import { useRef, useCallback, useState } from 'react'
+import { 
+    useRef,
+    useCallback,
+    type Dispatch,
+    type SetStateAction
+ } from 'react'
 import Image from 'next/image'
-import { Loading, ListingsRow } from '@/app/page'
+import type { 
+    Loading,
+    ListingsRow,
+    Query 
+} from '@/app/page'
 import {
   Card,
   CardContent,
@@ -14,13 +23,13 @@ import { MapPin, Gauge, Ruler } from 'lucide-react';
 
 type SearchProps = {
     listings: ListingsRow[]
-    fetchListings: () => Promise<void>
+    setQuery: Dispatch<SetStateAction<Query>>
     loadingState: Loading
 }
 
 export const bestMatchThreshold = 1.1
 
-export function Results({ listings, fetchListings, loadingState }:  SearchProps ) {
+export function Results({ listings, setQuery, loadingState }:  SearchProps ) {
     const observer = useRef<IntersectionObserver>()
 
     // Infinite scroll handler 
@@ -30,12 +39,15 @@ export function Results({ listings, fetchListings, loadingState }:  SearchProps 
         if (observer.current) observer.current.disconnect()
         observer.current = new IntersectionObserver((entries) => {
             if(entries[0].isIntersecting) {
-                fetchListings()
+                setQuery((prev) => ({
+                    ...prev,
+                    pageNum: ++prev.pageNum
+                }))
             }
         })
         observer.current.observe(node)
 
-    }, [fetchListings, loadingState])
+    }, [loadingState, setQuery])
 
     return (
     <div className='flex flex-col justify-center items-center gap-4'>

@@ -1,6 +1,9 @@
 'use client'
 
-import { Dispatch, SetStateAction } from 'react'
+import type { 
+    Query, 
+    SetQuery
+} from '@/app/page'
 import {
     Select,
     SelectContent,
@@ -12,15 +15,19 @@ import { ArrowDownWideNarrow } from 'lucide-react';
 
 export type SortMethod = 'Relevance' | 'Nearest' | 'Highest Price' | 'Lowest Price' 
 type SortProps = {
-    setSortMethod: Dispatch<SetStateAction<SortMethod>>
-    sortMethod: SortMethod
+    query: Query
+    setQuery: SetQuery
     className: string | undefined
 }
 
-export function Sort({ setSortMethod, sortMethod,className }: SortProps) {
+export function Sort({ query, setQuery, className }: SortProps) {
 
     const valueChangeHandler = (selection: SortMethod) => {
-        setSortMethod(selection)
+        setQuery((prev) => ({
+            ...prev,
+            pageNum: 0,
+            sortMethod: selection
+        }))
     }
 
     return (
@@ -28,7 +35,7 @@ export function Sort({ setSortMethod, sortMethod,className }: SortProps) {
             <ArrowDownWideNarrow strokeWidth={1.75} size={20} className='min-w-5'/>
             <Select onValueChange={valueChangeHandler}>
                 <SelectTrigger className='border-none text-base text-left pl-0 max-w-52 min-w-[95px]'>
-                    <SelectValue placeholder={<span>Sort By <span className='font-semibold'>{sortMethod}</span></span>} />
+                    <SelectValue placeholder={<span>Sort By <span className='font-semibold'>{query.sortMethod}</span></span>} />
                 </SelectTrigger>
                 <SelectContent>
                     <SelectItem value="Relevance">Relevance</SelectItem>
