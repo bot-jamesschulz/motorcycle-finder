@@ -4,9 +4,7 @@ import { createClient } from '@supabase/supabase-js';
 import { 
     useEffect, 
     useState,
-    useRef,
-    type Dispatch, 
-    type SetStateAction
+    useRef
 } from "react"
 import { milesToMeters } from '@/lib/utils'
 import { Database } from '@/lib/database.types'
@@ -18,7 +16,8 @@ import type {
     Loading,
     Position,
     Range,
-    FetchOptions
+    Query,
+    SetQuery
  } from '@/app/page'
 import { 
     Sort, 
@@ -53,21 +52,10 @@ export type SearchFormSchemaType = z.infer<typeof FormSchema>
 
 type SearchProps = {
     searchHandler: SubmitHandler<SearchFormSchemaType>
-    sortMethod: SortMethod
-    setSortMethod: Dispatch<SetStateAction<SortMethod>>
     loadingState: Loading
-    position: Position
-    setPosition: Dispatch<SetStateAction<Position>>
-    fetchListings: (options?: FetchOptions) => Promise<void>
+    query: Query,
+    setQuery: SetQuery
 }
-
-
-
-export const FormSchema = z.object({
-    keyword: z.string(),
-    location: z.string(),
-    range: z.enum(['10','25','50','75','100','200','500'])
-})
 
 export const defaultRange: Range = "500"
 export const defaultPosition: Position = {
@@ -76,6 +64,13 @@ export const defaultPosition: Position = {
     range: defaultRange
 }
 export const defaultSort: SortMethod = 'Relevance'
+export const defaultZip = '93654'
+
+export const FormSchema = z.object({
+    keyword: z.string(),
+    location: z.string().transform((val) => (val === '' ? defaultZip : val)),
+    range: z.enum(['10','25','50','75','100','200','500'])
+})
 
 let Supabase = createClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -84,12 +79,9 @@ let Supabase = createClient<Database>(
 
 export function Search({ 
         searchHandler, 
-        sortMethod,
-        setSortMethod, 
         loadingState,
-        position,
-        setPosition,
-        fetchListings
+        query,
+        setQuery
     }: SearchProps) {
     const [open, setOpen] = useState(false)
     const [makesInRange, setMakesInRange] = useState<MakeCount[]>([])
@@ -155,31 +147,26 @@ export function Search({
     // Get make counts
     useEffect( () => {
         const fetchData = async () => {
-            console.log('start of fetch', position)
+            console.log('fetching make count', {
+                ...query.position,
+                range: Number(query.position.range)
+            })
             if (!Supabase) return
             const { data, error } = await Supabase.rpc('make_count_in_range', {
-                ...position,
-                range: Number(milesToMeters(position.range))
+                ...query.position,
+                range: milesToMeters(Number(query.position.range))
             })
-            if (error) return
-            if (!data?.length) return
+            if (error) {
+                console.log('error getting makes', error)
+                return
+            }
             setMakesInRange(data)
-            
-            
         }
         fetchData()
         
-    }, [position])
+    }, [query.position])
 
     console.log('makes', makesInRange)
-
-    const rangeChangeHandler = (range: Range) => {
-        
-        setPosition((prev: Position) => ({
-            ...prev, 
-            range: range
-        }))
-    }
 
     return  (
         <Form {...form}>
@@ -244,7 +231,7 @@ export function Search({
                             render={({ field }) => (
                                 <FormItem>
                                     <FormControl>
-                                        <Select onValueChange={rangeChangeHandler}>
+                                        <Select onValueChange={field.onChange}>
                                             <SelectTrigger className="w-[100px]">
                                                 <SelectValue placeholder={`${defaultRange} mi.`} />
                                             </SelectTrigger>
@@ -268,13 +255,13 @@ export function Search({
                     <Button className="self-center h-9 w-1/4" type="submit">Search</Button>
                         { loadingState && 
                             <div className='flex items-center max-w-40 justify-between h-9 py-2 px-4 self-center grow basis-0 cursor-pointer'>
-                                <Filter makesInRange={makesInRange} fetchListings={fetchListings}/>
+                                <Filter makesInRange={makesInRange} setQuery={setQuery}/>
                             </div>                     
                        }
                         { loadingState && 'loaded' && 
                             <Sort className='self-center grow basis-0' 
-                            setSortMethod={setSortMethod} 
-                            sortMethod={sortMethod}
+                            query={query}
+                            setQuery={setQuery} 
                         />}
                     </div>
                 </div>

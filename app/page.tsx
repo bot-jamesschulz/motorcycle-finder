@@ -6,16 +6,19 @@ import {
   defaultSort,
   defaultPosition
 } from '@/components/Search'
+import { createClient } from '@supabase/supabase-js';
 import { 
   useState, 
-  useRef, 
   useCallback, 
-  useEffect 
+  useEffect,
+  type Dispatch,
+  type SetStateAction
 } from 'react'
 import { 
   Results, 
   NoResults
 } from '@/components/Results'
+
 import type { SortMethod } from '@/components/Sort'
 import { LocationMiss } from '@/components/LocationMiss'
 import { ThemeProvider } from '@/components/theme-provider'
@@ -25,131 +28,142 @@ import { milesToMeters } from '@/lib/utils'
 import { Database } from '@/lib/database.types'
 
 export type Loading = 'loading' | 'loaded' | 'no results' |'location not found' | undefined
-export type ListingsRow = Database['public']['Functions']['keyword_proximity_search']['Returns']
+export type ListingsRow = Database['public']['Functions']['keyword_proximity_search']['Returns'][0]
 export type Range = SearchFormSchemaType['range']
 export type Position = {
   x: number
   y: number
   range: Range
 }
-type Query = {
+type Filters = {
+  makes: string[],
+  models: string[]
+}
+export type Query = {
   keyword: string
   pageNum: number
   endOfListings: boolean
   sortMethod: SortMethod
-} & Position
-type SearchResponsePayload = {
-  data: ListingsRow[]
-  query: Query
+  filters: Filters
+  position: Position
+  initialSearch: boolean
 }
+export type SetQuery = Dispatch<SetStateAction<Query>>
 export type FetchOptions = {
   reset: boolean
 }
+const defaultQuery: Query = {
+  keyword: '',
+  pageNum: 0,
+  endOfListings: false,
+  sortMethod: defaultSort,
+  filters: {
+    makes: [],
+    models: []
+  },
+  position: defaultPosition,
+  initialSearch: false
+}
+
+let Supabase = createClient<Database>(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
 
 export default function Home() {
   
   const [listings, setListings] = useState<ListingsRow[]>([])
-  const [position, setPosition] = useState<Position>(defaultPosition)
   const [loadingState, setLoadingState] = useState<Loading>() // If results are found or not
-  const [sortMethod, setSortMethod] = useState<SortMethod>(defaultSort)
-  const queryRef = useRef<Query>()
+  const [query, setQuery] = useState<Query>(defaultQuery)
 
-  // New listings for infinite scroll
-  const fetchListings = useCallback(async (options: FetchOptions = { reset: false }) => {  
-    if (!queryRef.current) return
+  const setPageNum = useCallback(async (options: FetchOptions = { reset: false }) => {
     
-    if (options.reset) {
-      queryRef.current.pageNum = 0
-    } else {
-      queryRef.current.pageNum++
-    }
-    const currQuery: Query = queryRef.current
+      setQuery((prev) => ({
+        ...prev,
+        pageNum: options.reset ? 0 : prev.pageNum++
+      }))
+     
+  },[])
 
-    if (currQuery.endOfListings) return
-  
-    const response = await fetch(`/api/fetchListings?` + new URLSearchParams({
-      x: currQuery.x.toString(),
-      y: currQuery.y.toString(),
-      range: milesToMeters(position.range),
-      keyword: currQuery.keyword,
-      pageNum: currQuery.pageNum.toString(),
-      sortMethod
-    }))
+  // listings fetch
+  useEffect(() => {  
+    const fetchListings = async () => {
 
-    if (!response.ok) return
+      if (query.endOfListings || !query.initialSearch) return
 
-    const { data }: SearchResponsePayload = await response.json()
+      if (query.pageNum === 0) setLoadingState('loading')
+
+      console.log('fetching listings', query)
+
+      if (!Supabase) return
+      const { data, error } = await Supabase.rpc('keyword_proximity_search', {
+        x: query.position.x,
+        y: query.position.y,
+        range: milesToMeters(Number(query.position.range)),  
+        keyword: query.keyword,  
+        sortMethod: query.sortMethod,
+        makes: query.filters.makes,
+        models: query.filters.models,
+        pageNum: query.pageNum
+      })
+
+      if (error) {
+        console.log('Error fetching listings', error)
+        return
+      }
     
-    setLoadingState('loaded')
+      setLoadingState('loaded')
 
-    if (!data?.length) {
-      if (options.reset) setLoadingState('no results')
-      else queryRef.current.endOfListings = true
-      return
+      if (!data?.length) {
+        if (query.pageNum === 0) setLoadingState('no results')
+        else setQuery((prev) => ({...prev, endOfListings: true}))
+        return
+      }
+      
+      if (query.pageNum === 0) {
+        console.log('reset')
+        setListings(data) 
+      }
+      else setListings((prev) => prev.concat(data))  
     }
+    fetchListings()
 
-    if (options.reset) {
-      setListings(data)
-    } else {
-      setListings((prev) => prev.concat(data))
-    }
-
-  },[sortMethod, position])
-
-  // Listings fetch trigger for sort and range changes
-  useEffect(() => {
-    if (!queryRef.current) return
-    setLoadingState('loading')
-    fetchListings({ reset: true })
-
-  },[sortMethod, fetchListings, position.range])
+  },[query])
 
 
-  // Initial search request
-  const searchHandler = async (values: SearchFormSchemaType) => {
-    const { keyword, location, range } = values
+  // Search submission
+  const searchHandler = useCallback(async (values: SearchFormSchemaType) => {
 
-    const rangeMeters = milesToMeters(range).toString()
+    const { location, keyword, range} = values
 
-    console.log('rangeMeters', rangeMeters)
+    console.log('form values', values)
 
     setLoadingState('loading')
 
-    const response = await fetch(`/api/search?` + new URLSearchParams({
-      keyword,
-      location,
-      range: rangeMeters,
-      sortMethod
+    const response = await fetch(`/api/getLocation?` + new URLSearchParams({
+      location: location
     }));
-
-    const { data, query }: SearchResponsePayload = await response.json()
-
-    setPosition((prev) => ({
-      x: query.x,
-      y: query.y,
-      range: prev.range
-    }))
 
     if (response.ok) {
 
-      if (data?.length) {
-        setLoadingState('loaded')
-        setListings(data)
+      const data: { x: number, y: number } = await response.json()
+      console.log('location', data)
+      setQuery((prev) => ({
+        ...prev,
+        keyword: keyword,
+        position: {
+          x: data.x,
+          y: data.y,
+          range
+        }, 
+        initialSearch: true
+      }))
 
-        queryRef.current = {
-          ...query, 
-          pageNum: 0
-        }
-
-      }
-      else {
-        setLoadingState('no results')
-      }
-    } else {
+    } else { 
       console.error(response.status)
       if (response.status === 404) setLoadingState('location not found')
     }
-  }
+  }, [])
 
   return (
     <body >
@@ -171,19 +185,16 @@ export default function Home() {
                 <div className='relative w-fit'>
                 <Search 
                   searchHandler={searchHandler} 
-                  setSortMethod={setSortMethod} 
-                  sortMethod={sortMethod} 
                   loadingState={loadingState} 
-                  position={position}
-                  setPosition={setPosition}
-                  fetchListings={fetchListings}
+                  query={query}
+                  setQuery={setQuery}
                 />
                 <LoadingIcon loadingState={loadingState}/>
                 </div>
               </div>
               {loadingState === 'loaded' && (
                   <Results listings={listings} 
-                    fetchListings={fetchListings}
+                    setQuery={setQuery}
                     loadingState={loadingState}
                   />
               )}
