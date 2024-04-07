@@ -1,22 +1,12 @@
 import { type NextRequest } from 'next/server'
-import locations from '@/public/USCities'
-import Fuse from 'fuse.js'
-
-const fuseOptions = {
-	includeScore: true,
-	includeMatches: true,
-	threshold: 0.25,
-	keys: [
-		"zipCode",
-		"city"
-	]
-};
-
-const fuse = new Fuse(locations, fuseOptions);
+import fuse from '@/lib/fuse'
+const limitedStates = ['California']
 
 export async function GET(request: NextRequest) {
 	const searchParams = request.nextUrl.searchParams
 	const searchPattern = searchParams.get('searchValue');
+
+	console.log('before fuze autocomplete:', new Date())
 
 	if (!searchPattern) return Response.json([]);
 
@@ -24,15 +14,28 @@ export async function GET(request: NextRequest) {
 
 	const locationOptions: string[] = []
 
-	fuseResults.forEach(res => {
+
+	for (const res of fuseResults) {
+		
 		const item = res.item
+
+		if (!limitedStates.includes(item.state) || !res.score || !res.matches) continue
+
+		if (res?.score < 0.0001 &&
+			res.matches[0].key === 'zipCode') {
+			console.log(res)
+			break
+		}
+
 		const location = `${item.city}, ${item.state}`
 
 		if (!locationOptions.includes(location) && locationOptions.length < 10) {
 			locationOptions.push(location)
 		}
 
-	});
+	};
+
+	console.log('after fuze autocomplete:', new Date())
 
 	return Response.json(locationOptions)
 }

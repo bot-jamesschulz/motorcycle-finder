@@ -1,14 +1,30 @@
-"use client"
+'use client'
 
 import { 
     useEffect, 
     useState,
     useRef
 } from "react"
+import { Database } from '@/lib/database.types'
 import { SubmitHandler } from "react-hook-form"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
+import type { 
+    Loading,
+    Query,
+    SetQuery,
+    MileRange
+} from '@/app/page'
+import {
+    defaultZip,
+    defaultMileRange
+} from '@/lib/defaults'
+import { 
+    Sort, 
+    type SortMethod 
+} from '@/components/Sort'
+import { Filter } from '@/components/Filter'
 import { Input } from "@/components/ui/input"
 import {
   Select,
@@ -23,7 +39,7 @@ import {
     FormField,
     FormItem,
     FormMessage,
-  } from "@/components/ui/form"
+} from "@/components/ui/form"
 import { Button } from "@/components/ui/button"
 import {
     Command,
@@ -31,45 +47,58 @@ import {
     CommandItem,
 } from "@/components/ui/command"
 
-export const FormSchema = z.object({
-    keyword: z.string(),
-    location: z.string(),
-    proximity: z.enum(['10','25','50','75','100','200','500'])
-})
-
-export type FormSchemaType = z.infer<typeof FormSchema>
-
+export type SearchFormSchemaType = z.infer<typeof FormSchema>
 
 type SearchProps = {
-    searchHandler: SubmitHandler<FormSchemaType>
+    searchHandler: SubmitHandler<SearchFormSchemaType>
+    loadingState: Loading
+    query: Query,
+    setQuery: SetQuery
 }
 
-export function Search({ searchHandler}: SearchProps) {
+export const FormSchema = z.object({
+    keyword: z.string(),
+    location: z.string().transform((val) => (val === '' ? defaultZip : val)),
+    range: z.enum(['10','25','50','75','100','200','500'])
+})
+
+export function Search({ 
+        searchHandler, 
+        loadingState,
+        query,
+        setQuery
+    }: SearchProps) {
     const [open, setOpen] = useState(false)
     const locationOptionsRef = useRef<string[]>([])
     const [locationOptions, setLocationOptions ] = useState<string[]>([])
     const selectRef = useRef<HTMLDivElement>(null)
     
-    const form = useForm<FormSchemaType>({
+    const form = useForm<SearchFormSchemaType>({
         resolver: zodResolver(FormSchema),
         defaultValues: {
             keyword: "",
             location: "",
-            proximity: "50"
+            range: defaultMileRange
         },
     })
 
     const locationValue = form.watch('location')
 
+    // Autocomplete
     useEffect(() => {
+        let ignore = false
         const handleAutocomplete = async () => {
             const res = await fetch(`api/locationAutocomplete?` + new URLSearchParams({
                 searchValue: locationValue
             }))
             const body = await res.json()
             locationOptionsRef.current = body
-            setLocationOptions(body)
-            setOpen(true)
+            if (Array.isArray(body) && body.length && !ignore) {
+                setLocationOptions(body)
+                setOpen(true)
+            } else {
+                setOpen(false)
+            }
         }
        
         if (locationValue.length >= 3 && !locationOptionsRef.current.find(l => l.toLowerCase() === locationValue.toLowerCase())) {
@@ -77,27 +106,34 @@ export function Search({ searchHandler}: SearchProps) {
         } else {
             setOpen(false)
         }        
+
+        return () => {
+            ignore = true
+        }
     },[locationValue])
 
+    // Closing of the autocomplete drop down
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
 
             if (event.target instanceof Element && open && !selectRef?.current?.contains(event.target)) {
                 setOpen(false);
             }
-        };
+        }
 
         document.body.addEventListener("click", handleClickOutside);
 
         return () => {
             document.body.removeEventListener("click", handleClickOutside);
-        };
-    }, [open]);
+        }
+    }, [open])
+
+
 
     return  (
         <Form {...form}>
-            <form onSubmit={form.handleSubmit(searchHandler)} className="">
-                <div className="flex flex-col gap-5 w-full h-1/2 max-w-lg">
+            <form onSubmit={form.handleSubmit(searchHandler)} className="flex flex-col gap-5 w-full">
+                <div className="flex flex-col gap-5 w-full h-1/2 max-w-2xl"> 
                     <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl">Find your next motorcycle.</h1>
                     <div className="w-full">
                         <FormField
@@ -106,7 +142,7 @@ export function Search({ searchHandler}: SearchProps) {
                             render={({ field }) => (
                                 <FormItem>
                                     <FormControl>
-                                        <Input placeholder="Search by keyword" {...field} />
+                                        <Input placeholder="Search by Keyword (e.g. Yamaha R6)" {...field} />
                                     </FormControl>
                                 <FormMessage />
                                 </FormItem>
@@ -121,10 +157,12 @@ export function Search({ searchHandler}: SearchProps) {
                                 render={({ field }) => (
                                     <FormItem>
                                         <FormControl>
-                                            <Input placeholder="ZIP or City, State" {...field} />
+                                            <Input autoComplete="postal-code" placeholder="ZIP or City, State" {...field} />
                                         </FormControl>
+                                        <FormMessage />
                                     </FormItem>
                                 )}
+                            
                             />
                             
                             {open ? (
@@ -134,29 +172,27 @@ export function Search({ searchHandler}: SearchProps) {
                                     <CommandItem
                                         key={index}
                                         value={location}
-                                        onSelect={(currentValue) => {
+                                        onSelect={() => {
                                         form.setValue('location', location)
                                         setOpen(false)
                                         }}
                                     >
-                                        
                                         {location}
                                     </CommandItem>
                                     ))}
                                 </CommandGroup>
                             </Command>) : null}
-                            
                         </div>
                         <div>
                         <FormField
                             control={form.control}
-                            name="proximity"
+                            name="range"
                             render={({ field }) => (
                                 <FormItem>
                                     <FormControl>
                                         <Select onValueChange={field.onChange}>
                                             <SelectTrigger className="w-[100px]">
-                                                <SelectValue placeholder="50 mi." />
+                                                <SelectValue placeholder={`${defaultMileRange} mi.`} />
                                             </SelectTrigger>
                                             <SelectContent>
                                                 <SelectItem value="10">10 mi.</SelectItem>
@@ -173,8 +209,20 @@ export function Search({ searchHandler}: SearchProps) {
                             )}
                         />
                         </div>
-                        </div>
-                    <Button className="self-center" type="submit">Search</Button>
+                    </div>
+                    <div className={`flex ${loadingState === 'loaded' ? 'justify-start' : 'justify-center'} content-center gap-2`}>
+                    <Button className="self-center h-9 w-1/4" type="submit">Search</Button>
+                        { loadingState && 
+                            <div className='flex items-center max-w-40 justify-between h-9 py-2 px-4 self-center grow basis-0 cursor-pointer'>
+                                <Filter query={query} setQuery={setQuery}/>
+                            </div>                     
+                       }
+                        { loadingState && 'loaded' && 
+                            <Sort className='self-center grow basis-0' 
+                            query={query}
+                            setQuery={setQuery} 
+                        />}
+                    </div>
                 </div>
             </form>
         </Form>
