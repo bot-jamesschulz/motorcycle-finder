@@ -28,6 +28,20 @@ import { ModeToggle } from '@/components/ui/mode-toggle'
 import { milesToMeters } from '@/lib/utils'
 import { Database } from '@/lib/database.types'
 
+export type PriceRange = [number, number]
+export type YearRange = [number, number]
+
+export const [minYear, maxYear]: YearRange = [
+  1900, 
+  new Date().getFullYear() + 2
+]
+export const years: number[] = []
+for (let year = maxYear; year >= minYear; year--) {
+  years.push(year);
+}
+
+export const defaultPriceRange: PriceRange  = [0, 1_000_000]
+
 export type Loading = 'loading' | 'loaded' | 'no results' |'location not found' | undefined
 export type ListingsRow = Database['public']['Functions']['proximity_search']['Returns'][0]
 export type Range = SearchFormSchemaType['range']
@@ -39,6 +53,9 @@ export type Position = {
 type Filters = {
   makes: string[],
   models: ModelOption[]
+  price: PriceRange
+  hideNullPrices: boolean
+  year: YearRange
 }
 export type Query = {
   keyword: string
@@ -60,7 +77,10 @@ const defaultQuery: Query = {
   sortMethod: defaultSort,
   filters: {
     makes: [],
-    models: []
+    models: [],
+    price: defaultPriceRange,
+    hideNullPrices: false,
+    year: [minYear, maxYear]
   },
   position: defaultPosition,
   initialSearch: false
@@ -99,6 +119,9 @@ export default function Home() {
         sortMethod: query.sortMethod,
         makeFilter: query.filters.makes,
         modelFilter: query.filters.models.map(m => m.model),
+        priceFilter: query.filters.price,
+        hideNullPrices: query.filters.hideNullPrices,
+        yearFilter: query.filters.year,
         pageNum: query.pageNum
       })
 

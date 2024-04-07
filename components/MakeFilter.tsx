@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import { X } from "lucide-react";
-import { ScrollArea } from "@/components/ui/scroll-area"
 import { Badge } from "@/components/ui/badge";
 import {
   Command,
@@ -47,6 +46,7 @@ export function MakeFilter({
         pageNum: 0,
         endOfListings: false,
         filters: {
+            ...prev.filters,
             makes: newMakeFilter,
             models: prev.filters.models.filter(m => newMakeFilter.includes(m.make))
         }

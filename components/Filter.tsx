@@ -3,8 +3,7 @@
 import { 
     useState,
     useEffect,
-    useMemo,
-    useCallback
+    useMemo
 } from 'react'
 import { milesToMeters } from '@/lib/utils'
 import { createClient } from '@supabase/supabase-js'
@@ -20,16 +19,13 @@ import { SlidersHorizontal } from 'lucide-react'
 import { Database } from '@/lib/database.types'
 import { ModelFilter } from '@/components/ModelFilter'
 import { MakeFilter } from '@/components/MakeFilter'
+import { PriceFilter } from '@/components/PriceFilter'
+import { YearFilter } from '@/components/YearFilter'
 import type { 
     Query,
     SetQuery 
 } from '@/app/page'
-import {
-    Accordion,
-    AccordionContent,
-    AccordionItem,
-    AccordionTrigger,
-} from "@/components/ui/accordion"
+
 
 export type ModelOption = Record<'value' | 'label' | 'make', string>;
 export type Option = Record<'value' | 'label', string>;
@@ -91,7 +87,6 @@ export function Filter({ query, setQuery}: FilterProps) {
                 console.log('error getting makes', error)
                 return
             }
-            
             setMakesInRange(data)
         }
         fetchData()
@@ -126,20 +121,22 @@ export function Filter({ query, setQuery}: FilterProps) {
         <Sheet>
             <SheetTrigger  className='mx-auto flex text-base justify-center items-center gap-2'><SlidersHorizontal size={20}/>Filter</SheetTrigger>
             <SheetContent onOpenAutoFocus={(e) => e.preventDefault()} className='flex flex-col' side='left'>
-            <SheetHeader>
-                <SheetTitle>Makes</SheetTitle>
+                <SheetTitle>Make</SheetTitle>
                 <SheetDescription>
-
                     <MakeFilter options={makeOptions} query={query} setQuery={setQuery}/>
                 </SheetDescription>
-            </SheetHeader>
-            <SheetHeader>
-                <SheetTitle>Models</SheetTitle>
+                <SheetTitle>Model</SheetTitle>
                 <SheetDescription>
                     <ModelFilter options={modelOptions} modelsInRange={modelsInRange} selected={modelSelections} query={query} setQuery={setQuery}/>
                 </SheetDescription>
-            </SheetHeader>
-                
+                <SheetTitle>Price</SheetTitle>
+                <SheetDescription>
+                    <PriceFilter query={query} setQuery={setQuery} />
+                </SheetDescription>
+                <SheetTitle>Year</SheetTitle>
+                <SheetDescription>
+                    <YearFilter query={query} setQuery={setQuery} />
+                </SheetDescription>
             </SheetContent>
         </Sheet>
     )
