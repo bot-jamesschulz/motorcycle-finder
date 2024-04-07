@@ -26,13 +26,13 @@ const format = (val: string | number) => {
 export function PriceFilter({ query, setQuery }: {query: Query, setQuery: SetQuery }) {
     const [isChecked, setIsChecked] = useState(query.filters.hideNullPrices)
     const [currFilterMin, currFilterMax] = [query.filters.price[0], query.filters.price[1]]
-    const minPlaceholder = currFilterMin === defaultPriceRange[0] ? '' : format(currFilterMin)
-    const maxPlaceholder = currFilterMax === defaultPriceRange[1] ? '' : format(currFilterMax)
-    
+    const [minInputValue, setMinInputValue] = useState(currFilterMin === defaultPriceRange[0] ? '$0' : format(currFilterMin))
+    const [maxInputValue, setMaxInputValue] = useState(currFilterMax === defaultPriceRange[1] ? '' : format(currFilterMax))
+
     const handleMinBlur = (e: FocusEvent<HTMLInputElement>) => {
         
         const val = Number(e.target.value.replace(/\D/g, ''))
-        e.target.value = format(val)
+        setMinInputValue(format(val))
 
         setQuery((prev) => ({
             ...prev,
@@ -56,11 +56,7 @@ export function PriceFilter({ query, setQuery }: {query: Query, setQuery: SetQue
             return
         }
 
-        e.target.value = val.toLocaleString('en-US', {
-            style: 'currency',
-            currency: 'USD',
-            minimumFractionDigits: 0
-        })
+        setMaxInputValue(format(val))
 
         setQuery((prev) => ({
             ...prev,
@@ -82,7 +78,8 @@ export function PriceFilter({ query, setQuery }: {query: Query, setQuery: SetQue
                         onBlur={handleMinBlur} 
                         type="min-price" 
                         id="min-price" 
-                        placeholder={minPlaceholder}
+                        value={minInputValue}
+                        onChange={(el) => setMinInputValue(el.target.value)}
                         />
                 </div>
                 <div className="grid w-full max-w-sm items-center gap-1.5">
@@ -91,7 +88,8 @@ export function PriceFilter({ query, setQuery }: {query: Query, setQuery: SetQue
                         onBlur={handleMaxBlur} 
                         type="max-price" 
                         id="max-price" 
-                        placeholder={maxPlaceholder} 
+                        value={maxInputValue} 
+                        onChange={(el) => setMaxInputValue(el.target.value)}
                     />
                 </div>
             </div>
