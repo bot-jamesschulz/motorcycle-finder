@@ -120,7 +120,7 @@ export function Filter({ query, setQuery}: FilterProps) {
     return (
         <Sheet>
             <SheetTrigger  className='mx-auto flex text-base justify-center items-center gap-2'><SlidersHorizontal size={20}/>Filter</SheetTrigger>
-            <SheetContent onOpenAutoFocus={(e) => e.preventDefault()} className='flex flex-col' side='left'>
+            <SheetContent onOpenAutoFocus={(e) => e.preventDefault()} className='flex flex-col overflow-scroll' side='left'>
                 <SheetTitle>Make</SheetTitle>
                 <SheetDescription>
                     <MakeFilter options={makeOptions} query={query} setQuery={setQuery}/>
