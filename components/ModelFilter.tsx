@@ -13,74 +13,93 @@ import type {
   Query,
   SetQuery
 } from '@/app/page'
+import type { Option } from '@/components/Filter'
 import { Command as CommandPrimitive } from "cmdk";
 
-export type Option = Record<'value' | 'label', string>;
+export type ModelOption = {
+  make: string
+  model: string
+  count: number
+}
 
 type MultiSelectProps = {
   options: Option[]
   query: Query
   setQuery: SetQuery
-  filterKey: keyof Query['filters']
   selected?: string[]
+  modelsInRange: ModelOption[]
 }
 
-export function MultiSelect({ 
+export function ModelFilter({ 
   options, 
   query,
   setQuery,
-  filterKey,
   selected,
+  modelsInRange
 }:  MultiSelectProps) {
 
   
   const inputRef = React.useRef<HTMLInputElement>(null);
   const [open, setOpen] = React.useState(false);
   const [inputValue, setInputValue] = React.useState("");
-  const queryFilters = query.filters[filterKey]
+  const modelFilter = query.filters.models
+  const makeFilter = query.filters.makes
+  const modelFilterValues = modelFilter.map(m => m.model)
 
-  console.log(`queryFilters, ${filterKey}`, queryFilters)
+  console.log(`modelFilter, models`, modelFilter)
+
+  const handleSelect = React.useCallback((option: Option) => {
+
+    setInputValue("")
+    inputRef?.current?.blur()
+    setOpen(false)
+
+    const modelInfo = modelsInRange.find(m => m.model === option.value)
+
+    if (!modelInfo) return
+
+    setQuery((prev) => {
+
+      return {
+        ...prev,
+        pageNum: 0,
+        endOfListings: false,
+        filters: {
+            ...prev.filters,
+            models: [...prev.filters.models, modelInfo]
+        }
+    }})
+  }, [setQuery, modelsInRange]);
+
 
   const handleUnselect = React.useCallback((option: String) => {
     setQuery((prev) => ({
       ...prev,
       pageNum: 0,
+      endOfListings: false,
       filters: {
           ...prev.filters,
-          [filterKey]: prev.filters[filterKey].filter(s => s !== option)
+          models: prev.filters.models.filter(s => s.model !== option)
       }
     }))
-  }, [filterKey, setQuery]);
+  }, [setQuery]);
 
-  const handleSelect = React.useCallback((option: Option) => {
-    
-    setInputValue("")
-    inputRef?.current?.blur()
-    setOpen(false)
-    setQuery((prev) => ({
-      ...prev,
-      pageNum: 0,
-      filters: {
-          ...prev.filters,
-          [filterKey]: [...prev.filters[filterKey], option.value]
-      }
-    }))
-  }, [filterKey, setQuery]);
-
+  
   const handleKeyDown = React.useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
     const input = inputRef.current
     if (input) {
       if (e.key === "Delete" || e.key === "Backspace") {
         if (input.value === "") {
           setQuery((prev) => {
-            const newSelected = [...prev.filters[filterKey]]
+            const newSelected = [...prev.filters.models]
             newSelected.pop()
             return {
               ...prev,
               pageNum: 0,
+              endOfListings: false,
               filters: {
                 ...prev.filters,
-                [filterKey]: newSelected
+                models: newSelected
               }
             }
           })
@@ -92,9 +111,9 @@ export function MultiSelect({
         input.blur();
       }
     }
-  }, [filterKey, setQuery]);
+  }, [setQuery]);
 
-  const selectables = options.filter(option => !queryFilters.includes(option.value));
+  const selectables = options.filter(option => !modelFilterValues.includes(option.value));
 
   return (
     <Command onKeyDown={handleKeyDown} className="overflow-visible bg-transparent">
@@ -102,7 +121,7 @@ export function MultiSelect({
         className="group border border-input px-3 py-2 text-sm ring-offset-background rounded-md focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2"
       >
         <div className="flex gap-1 flex-wrap">
-          {queryFilters.map((option) => {
+          {modelFilterValues.map((option) => {
             return (
               <Badge key={option} variant="secondary">
                 {option}
@@ -131,14 +150,14 @@ export function MultiSelect({
             onValueChange={setInputValue}
             onBlur={() => setOpen(false)}
             onFocus={() => setOpen(true)}
-            placeholder={`Select ${filterKey}`}
+            placeholder={`Select models`}
             className="ml-2 bg-transparent outline-none placeholder:text-muted-foreground flex-1"
           />
         </div>
       </div>
       <div className="relative mt-2">
         {open && selectables.length > 0 ?
-          <ScrollArea className="absolute w-full h-72 rounded-md border bg-popover text-popover-foreground shadow-md outline-none animate-in">
+          <div className="absolute z-10 top-0 w-full h-72 rounded-md border bg-popover text-left text-popover-foreground shadow-md outline-none animate-in">
               <CommandGroup className="h-full overflow-auto">
                 
                 {selectables.map((option) => {
@@ -158,7 +177,7 @@ export function MultiSelect({
                 })}
                 
               </CommandGroup>
-          </ScrollArea>
+          </div>
           : null}
       </div>
     </Command >

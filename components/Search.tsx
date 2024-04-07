@@ -1,12 +1,10 @@
 'use client'
 
-import { createClient } from '@supabase/supabase-js';
 import { 
     useEffect, 
     useState,
     useRef
 } from "react"
-import { milesToMeters } from '@/lib/utils'
 import { Database } from '@/lib/database.types'
 import { SubmitHandler } from "react-hook-form"
 import { z } from "zod"
@@ -46,8 +44,6 @@ import {
     CommandItem,
 } from "@/components/ui/command"
 
-export type MakeCounts = Database['public']['Functions']['make_count_in_range']['Returns']
-export type MakeCount = MakeCounts[0]
 export type SearchFormSchemaType = z.infer<typeof FormSchema>
 
 type SearchProps = {
@@ -72,11 +68,6 @@ export const FormSchema = z.object({
     range: z.enum(['10','25','50','75','100','200','500'])
 })
 
-let Supabase = createClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
-
 export function Search({ 
         searchHandler, 
         loadingState,
@@ -84,7 +75,6 @@ export function Search({
         setQuery
     }: SearchProps) {
     const [open, setOpen] = useState(false)
-    const [makesInRange, setMakesInRange] = useState<MakeCount[]>([])
     const locationOptionsRef = useRef<string[]>([])
     const [locationOptions, setLocationOptions ] = useState<string[]>([])
     const selectRef = useRef<HTMLDivElement>(null)
@@ -135,38 +125,16 @@ export function Search({
             if (event.target instanceof Element && open && !selectRef?.current?.contains(event.target)) {
                 setOpen(false);
             }
-        };
+        }
 
         document.body.addEventListener("click", handleClickOutside);
 
         return () => {
             document.body.removeEventListener("click", handleClickOutside);
-        };
-    }, [open]);
-
-    // Get make counts
-    useEffect( () => {
-        const fetchData = async () => {
-            console.log('fetching make count', {
-                ...query.position,
-                range: Number(query.position.range)
-            })
-            if (!Supabase) return
-            const { data, error } = await Supabase.rpc('make_count_in_range', {
-                ...query.position,
-                range: milesToMeters(Number(query.position.range))
-            })
-            if (error) {
-                console.log('error getting makes', error)
-                return
-            }
-            setMakesInRange(data)
         }
-        fetchData()
-        
-    }, [query.position])
+    }, [open])
 
-    console.log('makes', makesInRange)
+
 
     return  (
         <Form {...form}>
@@ -255,7 +223,7 @@ export function Search({
                     <Button className="self-center h-9 w-1/4" type="submit">Search</Button>
                         { loadingState && 
                             <div className='flex items-center max-w-40 justify-between h-9 py-2 px-4 self-center grow basis-0 cursor-pointer'>
-                                <Filter makesInRange={makesInRange} setQuery={setQuery}/>
+                                <Filter query={query} setQuery={setQuery}/>
                             </div>                     
                        }
                         { loadingState && 'loaded' && 

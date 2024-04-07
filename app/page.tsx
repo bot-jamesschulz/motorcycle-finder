@@ -20,6 +20,7 @@ import {
 } from '@/components/Results'
 
 import type { SortMethod } from '@/components/Sort'
+import type { ModelOption } from '@/components/ModelFilter'
 import { LocationMiss } from '@/components/LocationMiss'
 import { ThemeProvider } from '@/components/theme-provider'
 import LoadingIcon from '@/components/LoadingIcon'
@@ -28,7 +29,7 @@ import { milesToMeters } from '@/lib/utils'
 import { Database } from '@/lib/database.types'
 
 export type Loading = 'loading' | 'loaded' | 'no results' |'location not found' | undefined
-export type ListingsRow = Database['public']['Functions']['keyword_proximity_search']['Returns'][0]
+export type ListingsRow = Database['public']['Functions']['proximity_search']['Returns'][0]
 export type Range = SearchFormSchemaType['range']
 export type Position = {
   x: number
@@ -37,7 +38,7 @@ export type Position = {
 }
 type Filters = {
   makes: string[],
-  models: string[]
+  models: ModelOption[]
 }
 export type Query = {
   keyword: string
@@ -76,36 +77,32 @@ export default function Home() {
   const [loadingState, setLoadingState] = useState<Loading>() // If results are found or not
   const [query, setQuery] = useState<Query>(defaultQuery)
 
-  const setPageNum = useCallback(async (options: FetchOptions = { reset: false }) => {
-    
-      setQuery((prev) => ({
-        ...prev,
-        pageNum: options.reset ? 0 : prev.pageNum++
-      }))
-     
-  },[])
-
   // listings fetch
   useEffect(() => {  
     const fetchListings = async () => {
 
-      if (query.endOfListings || !query.initialSearch) return
+      console.log('checking if we should fetch listings', query)
+
+      if (!query.initialSearch || (query.endOfListings && query.pageNum)) return
 
       if (query.pageNum === 0) setLoadingState('loading')
 
       console.log('fetching listings', query)
 
       if (!Supabase) return
-      const { data, error } = await Supabase.rpc('keyword_proximity_search', {
+
+      const { data, error } = await Supabase.rpc('proximity_search', {
         x: query.position.x,
         y: query.position.y,
         range: milesToMeters(Number(query.position.range)),  
         keyword: query.keyword,  
         sortMethod: query.sortMethod,
-        makes: query.filters.makes,
-        models: query.filters.models,
+        makeFilter: query.filters.makes,
+        modelFilter: query.filters.models.map(m => m.model),
         pageNum: query.pageNum
       })
+
+      console.log('listings', data)
 
       if (error) {
         console.log('Error fetching listings', error)
@@ -118,7 +115,7 @@ export default function Home() {
         if (query.pageNum === 0) setLoadingState('no results')
         else setQuery((prev) => ({...prev, endOfListings: true}))
         return
-      }
+      } 
       
       if (query.pageNum === 0) {
         console.log('reset')
@@ -156,7 +153,9 @@ export default function Home() {
           y: data.y,
           range
         }, 
-        initialSearch: true
+        pageNum: 0,
+        initialSearch: true,
+        endOfListings: false
       }))
 
     } else { 
@@ -193,7 +192,9 @@ export default function Home() {
                 </div>
               </div>
               {loadingState === 'loaded' && (
-                  <Results listings={listings} 
+                  <Results 
+                    endOfListings={query.endOfListings}
+                    listings={listings} 
                     setQuery={setQuery}
                     loadingState={loadingState}
                   />

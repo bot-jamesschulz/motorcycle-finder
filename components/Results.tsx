@@ -23,22 +23,24 @@ import { MapPin, Gauge, Ruler } from 'lucide-react';
 
 type SearchProps = {
     listings: ListingsRow[]
+    endOfListings: boolean
     setQuery: Dispatch<SetStateAction<Query>>
     loadingState: Loading
 }
 
 export const bestMatchThreshold = 1.1
 
-export function Results({ listings, setQuery, loadingState }:  SearchProps ) {
+export function Results({ listings, endOfListings, setQuery, loadingState }:  SearchProps ) {
     const observer = useRef<IntersectionObserver>()
 
     // Infinite scroll handler 
     const fetchTrigger = useCallback((node: HTMLAnchorElement) => {
+        console.log('endOfListings', endOfListings)
         if (!node) return
         if (loadingState === 'loading') return
         if (observer.current) observer.current.disconnect()
         observer.current = new IntersectionObserver((entries) => {
-            if(entries[0].isIntersecting) {
+            if(entries[0].isIntersecting && !endOfListings) {
                 setQuery((prev) => ({
                     ...prev,
                     pageNum: ++prev.pageNum
@@ -47,7 +49,7 @@ export function Results({ listings, setQuery, loadingState }:  SearchProps ) {
         })
         observer.current.observe(node)
 
-    }, [loadingState, setQuery])
+    }, [loadingState, setQuery, endOfListings])
 
     return (
     <div className='flex flex-col justify-center items-center gap-4'>
@@ -73,13 +75,13 @@ export function Results({ listings, setQuery, loadingState }:  SearchProps ) {
                     const formattedMileage = mileage?.toLocaleString()
                     const conditionFinal = condition &&
                         condition.charAt(0).toUpperCase() + condition.slice(1)
-                    const milesConversionFactor = 0.0006213712;
-                    const distanceInMiles = distance * milesConversionFactor;
-
+                    const milesConversionFactor = 0.0006213712
+                    const distanceInMiles = distance * milesConversionFactor
+                    const possibleMatches = (listings[index-1]?.matchScore >= bestMatchThreshold) && matchScore < bestMatchThreshold
+                    
                     return (
-                        <div key={detailsUrl}>  
-                            {(listings[index-1]?.matchScore >= bestMatchThreshold) &&
-                            matchScore < bestMatchThreshold && <h4 className="w-full text-center scroll-m-20 m-24 text-xl font-semibold tracking-tight">Possible Matches</h4>}
+                        <div key={detailsUrl} className={`${possibleMatches && 'flex flex-wrap basis-full justify-center'}`}>  
+                            {possibleMatches && <h4 className="basis-full text-center scroll-m-20 m-24 text-xl font-semibold tracking-tight">Possible Matches</h4>}
                             <a  href={detailsUrl} rel='external' target='_blank' ref={
                                 index === listings.length - 4  
                                     ? fetchTrigger

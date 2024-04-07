@@ -13,23 +13,20 @@ import type {
   Query,
   SetQuery
 } from '@/app/page'
+import type { Option } from '@/components/Filter'
 import { Command as CommandPrimitive } from "cmdk";
-
-export type Option = Record<'value' | 'label', string>;
 
 type MultiSelectProps = {
   options: Option[]
   query: Query
   setQuery: SetQuery
-  filterKey: keyof Query['filters']
   selected?: string[]
 }
 
-export function MultiSelect({ 
+export function MakeFilter({ 
   options, 
   query,
   setQuery,
-  filterKey,
   selected,
 }:  MultiSelectProps) {
 
@@ -37,20 +34,25 @@ export function MultiSelect({
   const inputRef = React.useRef<HTMLInputElement>(null);
   const [open, setOpen] = React.useState(false);
   const [inputValue, setInputValue] = React.useState("");
-  const queryFilters = query.filters[filterKey]
+  const queryFilters = query.filters.makes
 
-  console.log(`queryFilters, ${filterKey}`, queryFilters)
+  console.log(`queryFilters, makes`, queryFilters)
 
   const handleUnselect = React.useCallback((option: String) => {
-    setQuery((prev) => ({
-      ...prev,
-      pageNum: 0,
-      filters: {
-          ...prev.filters,
-          [filterKey]: prev.filters[filterKey].filter(s => s !== option)
+    setQuery((prev) => {
+      const newMakeFilter = prev.filters.makes.filter(m => m !== option)
+      
+      return {
+        ...prev,
+        pageNum: 0,
+        endOfListings: false,
+        filters: {
+            makes: newMakeFilter,
+            models: prev.filters.models.filter(m => newMakeFilter.includes(m.make))
+        }
       }
-    }))
-  }, [filterKey, setQuery]);
+    })
+  }, [setQuery]);
 
   const handleSelect = React.useCallback((option: Option) => {
     
@@ -60,12 +62,13 @@ export function MultiSelect({
     setQuery((prev) => ({
       ...prev,
       pageNum: 0,
+      endOfListings: false,
       filters: {
           ...prev.filters,
-          [filterKey]: [...prev.filters[filterKey], option.value]
+          makes: [...prev.filters.makes, option.value]
       }
     }))
-  }, [filterKey, setQuery]);
+  }, [setQuery]);
 
   const handleKeyDown = React.useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
     const input = inputRef.current
@@ -73,14 +76,15 @@ export function MultiSelect({
       if (e.key === "Delete" || e.key === "Backspace") {
         if (input.value === "") {
           setQuery((prev) => {
-            const newSelected = [...prev.filters[filterKey]]
+            const newSelected = [...prev.filters.makes]
             newSelected.pop()
             return {
               ...prev,
               pageNum: 0,
+              endOfListings: false,
               filters: {
                 ...prev.filters,
-                [filterKey]: newSelected
+                makes: newSelected
               }
             }
           })
@@ -92,7 +96,7 @@ export function MultiSelect({
         input.blur();
       }
     }
-  }, [filterKey, setQuery]);
+  }, [setQuery]);
 
   const selectables = options.filter(option => !queryFilters.includes(option.value));
 
@@ -131,16 +135,15 @@ export function MultiSelect({
             onValueChange={setInputValue}
             onBlur={() => setOpen(false)}
             onFocus={() => setOpen(true)}
-            placeholder={`Select ${filterKey}`}
+            placeholder={`Select makes`}
             className="ml-2 bg-transparent outline-none placeholder:text-muted-foreground flex-1"
           />
         </div>
       </div>
       <div className="relative mt-2">
         {open && selectables.length > 0 ?
-          <ScrollArea className="absolute w-full h-72 rounded-md border bg-popover text-popover-foreground shadow-md outline-none animate-in">
+          <div className="absolute z-10 top-0 w-full h-72 rounded-md border bg-popover text-left text-popover-foreground shadow-md outline-none animate-in">
               <CommandGroup className="h-full overflow-auto">
-                
                 {selectables.map((option) => {
                   return (
                     <CommandItem
@@ -158,7 +161,7 @@ export function MultiSelect({
                 })}
                 
               </CommandGroup>
-          </ScrollArea>
+          </div>
           : null}
       </div>
     </Command >
