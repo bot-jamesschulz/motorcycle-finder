@@ -16,12 +16,7 @@ import {
   Results, 
   NoResults
 } from '@/components/Results'
-import { 
-  defaultPriceRange,
-  defaultYearRange,
-  defaultSort,
-  defaultPosition
-} from '@/lib/defaults'
+import { defaultQuery } from '@/lib/defaults'
 import type { SortMethod } from '@/components/Sort'
 import type { ModelOption } from '@/components/ModelFilter'
 import { LocationMiss } from '@/components/LocationMiss'
@@ -61,21 +56,6 @@ export type Query = {
 export type SetQuery = Dispatch<SetStateAction<Query>>
 export type FetchOptions = {
   reset: boolean
-}
-const defaultQuery: Query = {
-  keyword: '',
-  pageNum: 0,
-  endOfListings: false,
-  sortMethod: defaultSort,
-  filters: {
-    makes: [],
-    models: [],
-    price: defaultPriceRange,
-    hideNullPrices: false,
-    year: defaultYearRange
-  },
-  position: defaultPosition,
-  initialSearch: false
 }
 
 let Supabase = createClient<Database>(

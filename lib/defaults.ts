@@ -2,7 +2,8 @@ import type {
     YearRange,
     PriceRange,
     Position,
-    MileRange
+    MileRange,
+    Query
 } from '@/app/page'
 import type { SortMethod } from '@/components/Sort'
 
@@ -26,3 +27,19 @@ for (let year = defaultYearRange[1]; year >= defaultYearRange[0]; year--) {
 }
   
 export const defaultPriceRange: PriceRange  = [0, 1_000_000]
+
+export const defaultQuery: Query = {
+    keyword: '',
+    pageNum: 0,
+    endOfListings: false,
+    sortMethod: defaultSort,
+    filters: {
+      makes: [],
+      models: [],
+      price: defaultPriceRange,
+      hideNullPrices: false,
+      year: defaultYearRange
+    },
+    position: defaultPosition,
+    initialSearch: false
+  }
