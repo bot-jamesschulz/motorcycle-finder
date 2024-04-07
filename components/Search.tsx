@@ -12,11 +12,14 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import type { 
     Loading,
-    Position,
-    Range,
     Query,
-    SetQuery
- } from '@/app/page'
+    SetQuery,
+    MileRange
+} from '@/app/page'
+import {
+    defaultZip,
+    defaultMileRange
+} from '@/lib/defaults'
 import { 
     Sort, 
     type SortMethod 
@@ -53,15 +56,6 @@ type SearchProps = {
     setQuery: SetQuery
 }
 
-export const defaultRange: Range = "500"
-export const defaultPosition: Position = {
-    x: -119.401274,
-    y: 36.658709,
-    range: defaultRange
-}
-export const defaultSort: SortMethod = 'Relevance'
-export const defaultZip = '93654'
-
 export const FormSchema = z.object({
     keyword: z.string(),
     location: z.string().transform((val) => (val === '' ? defaultZip : val)),
@@ -84,7 +78,7 @@ export function Search({
         defaultValues: {
             keyword: "",
             location: "",
-            range: defaultRange
+            range: defaultMileRange
         },
     })
 
@@ -198,7 +192,7 @@ export function Search({
                                     <FormControl>
                                         <Select onValueChange={field.onChange}>
                                             <SelectTrigger className="w-[100px]">
-                                                <SelectValue placeholder={`${defaultRange} mi.`} />
+                                                <SelectValue placeholder={`${defaultMileRange} mi.`} />
                                             </SelectTrigger>
                                             <SelectContent>
                                                 <SelectItem value="10">10 mi.</SelectItem>

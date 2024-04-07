@@ -2,9 +2,7 @@
 
 import { 
   SearchFormSchemaType, 
-  Search,
-  defaultSort,
-  defaultPosition
+  Search
 } from '@/components/Search'
 import { createClient } from '@supabase/supabase-js';
 import { 
@@ -18,7 +16,12 @@ import {
   Results, 
   NoResults
 } from '@/components/Results'
-
+import { 
+  defaultPriceRange,
+  defaultYearRange,
+  defaultSort,
+  defaultPosition
+} from '@/lib/defaults'
 import type { SortMethod } from '@/components/Sort'
 import type { ModelOption } from '@/components/ModelFilter'
 import { LocationMiss } from '@/components/LocationMiss'
@@ -31,24 +34,13 @@ import { Database } from '@/lib/database.types'
 export type PriceRange = [number, number]
 export type YearRange = [number, number]
 
-export const [minYear, maxYear]: YearRange = [
-  1900, 
-  new Date().getFullYear() + 2
-]
-export const years: number[] = []
-for (let year = maxYear; year >= minYear; year--) {
-  years.push(year);
-}
-
-export const defaultPriceRange: PriceRange  = [0, 1_000_000]
-
 export type Loading = 'loading' | 'loaded' | 'no results' |'location not found' | undefined
 export type ListingsRow = Database['public']['Functions']['proximity_search']['Returns'][0]
-export type Range = SearchFormSchemaType['range']
+export type MileRange = SearchFormSchemaType['range']
 export type Position = {
   x: number
   y: number
-  range: Range
+  range: MileRange
 }
 type Filters = {
   makes: string[],
@@ -80,7 +72,7 @@ const defaultQuery: Query = {
     models: [],
     price: defaultPriceRange,
     hideNullPrices: false,
-    year: [minYear, maxYear]
+    year: defaultYearRange
   },
   position: defaultPosition,
   initialSearch: false
