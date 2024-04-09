@@ -1,19 +1,19 @@
-"use client";
+"use client"
 
-import * as React from "react";
-import { X } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import * as React from "react"
+import { X } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
 import {
   Command,
   CommandGroup,
   CommandItem,
-} from "@/components/ui/command";
+} from "@/components/ui/command"
 import type { 
   Query,
   SetQuery
 } from '@/app/page'
 import type { Option } from '@/components/Filter'
-import { Command as CommandPrimitive } from "cmdk";
+import { Command as CommandPrimitive } from "cmdk"
 
 type MultiSelectProps = {
   options: Option[]
@@ -26,16 +26,13 @@ export function MakeFilter({
   options, 
   query,
   setQuery,
-  selected,
 }:  MultiSelectProps) {
 
   
-  const inputRef = React.useRef<HTMLInputElement>(null);
-  const [open, setOpen] = React.useState(false);
-  const [inputValue, setInputValue] = React.useState("");
+  const inputRef = React.useRef<HTMLInputElement>(null)
+  const [open, setOpen] = React.useState(false)
+  const [inputValue, setInputValue] = React.useState("")
   const queryFilters = query.filters.makes
-
-  console.log(`queryFilters, makes`, queryFilters)
 
   const handleUnselect = React.useCallback((option: String) => {
     setQuery((prev) => {
@@ -52,7 +49,7 @@ export function MakeFilter({
         }
       }
     })
-  }, [setQuery]);
+  }, [setQuery])
 
   const handleSelect = React.useCallback((option: Option) => {
     
@@ -68,7 +65,7 @@ export function MakeFilter({
           makes: [...prev.filters.makes, option.value]
       }
     }))
-  }, [setQuery]);
+  }, [setQuery])
 
   const handleKeyDown = React.useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
     const input = inputRef.current
@@ -93,12 +90,12 @@ export function MakeFilter({
       }
       // This is not a default behaviour of the <input /> field
       if (e.key === "Escape") {
-        input.blur();
+        input.blur()
       }
     }
-  }, [setQuery]);
+  }, [setQuery])
 
-  const selectables = options.filter(option => !queryFilters.includes(option.value));
+  const selectables = options.filter(option => !queryFilters.includes(option.value))
 
   return (
     <Command onKeyDown={handleKeyDown} className="overflow-visible bg-transparent">
@@ -114,12 +111,12 @@ export function MakeFilter({
                   className="ml-1 ring-offset-background rounded-full outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
                   onKeyDown={(e) => {
                     if (e.key === "Enter") {
-                      handleUnselect(option);
+                      handleUnselect(option)
                     }
                   }}
                   onMouseDown={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
+                    e.preventDefault()
+                    e.stopPropagation()
                   }}
                   onClick={() => handleUnselect(option)}
                 >
@@ -149,15 +146,15 @@ export function MakeFilter({
                     <CommandItem
                       key={option.value}
                       onMouseDown={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
+                        e.preventDefault()
+                        e.stopPropagation()
                       }}
                       onSelect={() => handleSelect(option)}
                       className={"cursor-pointer"}
                     >
                       {option.label}
                     </CommandItem>
-                  );
+                  )
                 })}
                 
               </CommandGroup>

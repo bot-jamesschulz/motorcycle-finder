@@ -94,7 +94,8 @@ export function Results({ listings, endOfListings, setQuery, loadingState }:  Se
                                         width={1000}
                                         height={1000}
                                         alt=''
-                                        className='object-cover w-full h-56 sm:w-56 sm:h-full rounded'
+                                        className='object-cover w-full h-56 sm:w-56 sm:h-full rounded transition-opacity opacity-0 duration-[0.5s]'
+                                        onLoadingComplete={(img) => img.classList.remove('opacity-0')}
                                     />    
                                 </div>     
                                 <div className='grow h-full flex flex-col justify-between w-full sm:w-3/4'>       

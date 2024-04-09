@@ -1,9 +1,7 @@
 
 import  {
     type FocusEvent,
-    type FormEvent,
-    useState,
-    useEffect
+    useState
 } from 'react'
 import { 
     type Query,
@@ -14,7 +12,7 @@ import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Checkbox } from "@/components/ui/checkbox"
 
-const format = (val: string | number) => {
+export const formatToPrice = (val: string | number) => {
     return Number(val).toLocaleString('en-US', {
         style: 'currency',
         currency: 'USD',
@@ -22,18 +20,30 @@ const format = (val: string | number) => {
     })
 }
 
-
 export function PriceFilter({ query, setQuery }: {query: Query, setQuery: SetQuery }) {
     const [isChecked, setIsChecked] = useState(query.filters.hideNullPrices)
     const [currFilterMin, currFilterMax] = [query.filters.price[0], query.filters.price[1]]
-    const [minInputValue, setMinInputValue] = useState(currFilterMin === defaultPriceRange[0] ? '$0' : format(currFilterMin))
-    const [maxInputValue, setMaxInputValue] = useState(currFilterMax === defaultPriceRange[1] ? '' : format(currFilterMax))
+    const [minInputValue, setMinInputValue] = useState(currFilterMin === defaultPriceRange[0] ? '' : formatToPrice(currFilterMin))
+    const [maxInputValue, setMaxInputValue] = useState(currFilterMax === defaultPriceRange[1] ? '' : formatToPrice(currFilterMax))
 
     const handleMinBlur = (e: FocusEvent<HTMLInputElement>) => {
-        
         const val = Number(e.target.value.replace(/\D/g, ''))
-        setMinInputValue(format(val))
 
+        if (!val || val > currFilterMax) {
+            setMinInputValue('')
+            setQuery((prev) => ({
+                ...prev,
+                pageNum: 0,
+                endOfListings: false,
+                filters: {
+                    ...prev.filters,
+                    price: [defaultPriceRange[0], prev.filters.price[1]]
+                }
+            }))
+            return
+        }
+
+        setMinInputValue(formatToPrice(val))
         setQuery((prev) => ({
             ...prev,
             pageNum: 0,
@@ -43,21 +53,26 @@ export function PriceFilter({ query, setQuery }: {query: Query, setQuery: SetQue
                 price: [val, prev.filters.price[1]]
             }
         }))
-
-
     }
-
 
     const handleMaxBlur = (e: FocusEvent<HTMLInputElement>) => {
         const val = Number(e.target.value.replace(/\D/g, ''))
-        
-        if (!val) {
-            e.target.value = ''
+
+        if (!val || val < currFilterMin) {
+            setMaxInputValue('')
+            setQuery((prev) => ({
+                ...prev,
+                pageNum: 0,
+                endOfListings: false,
+                filters: {
+                    ...prev.filters,
+                    price: [prev.filters.price[0], defaultPriceRange[1]]
+                }
+            }))
             return
         }
 
-        setMaxInputValue(format(val))
-
+        setMaxInputValue(formatToPrice(val))
         setQuery((prev) => ({
             ...prev,
             pageNum: 0,

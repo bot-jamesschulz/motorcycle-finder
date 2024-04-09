@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
 	console.log('coordinates', coords);
 
 
-return Response.json(coords)
+return Response.json({ x: coords.x, y: coords.y, zipCode: match.item.zipCode })
 }
 
 

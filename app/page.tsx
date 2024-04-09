@@ -23,6 +23,7 @@ import { LocationMiss } from '@/components/LocationMiss'
 import { ThemeProvider } from '@/components/theme-provider'
 import LoadingIcon from '@/components/LoadingIcon'
 import { ModeToggle } from '@/components/ui/mode-toggle'
+import { FilterTags } from '@/components/FilterTags'
 import { milesToMeters } from '@/lib/utils'
 import { Database } from '@/lib/database.types'
 
@@ -51,6 +52,7 @@ export type Query = {
   sortMethod: SortMethod
   filters: Filters
   position: Position
+  zipCode: string
   initialSearch: boolean
 }
 export type SetQuery = Dispatch<SetStateAction<Query>>
@@ -113,7 +115,6 @@ export default function Home() {
       } 
       
       if (query.pageNum === 0) {
-        console.log('reset')
         setListings(data) 
       }
       else setListings((prev) => prev.concat(data))  
@@ -138,7 +139,7 @@ export default function Home() {
 
     if (response.ok) {
 
-      const data: { x: number, y: number } = await response.json()
+      const data: { x: number, y: number, zipCode: string } = await response.json()
       console.log('location', data)
       setQuery((prev) => ({
         ...prev,
@@ -148,6 +149,7 @@ export default function Home() {
           y: data.y,
           range
         }, 
+        zipCode: data.zipCode,
         pageNum: 0,
         initialSearch: true,
         endOfListings: false
@@ -160,30 +162,29 @@ export default function Home() {
   }, [])
 
   return (
-    <body >
+    <body>
       <ThemeProvider
         attribute="class"
         defaultTheme="system"
         enableSystem
         disableTransitionOnChange
       >
-        <div className="relative" >
+        <div className="relative">
           <div className="absolute top-0 right-0 m-4">
             <ModeToggle />
           </div>
         </div>
         <div className={`flex justify-center items-center`}>
           <div className="flex flex-col justify-center items-center w-full p-3 gap-2">
-              <div className={`${!loadingState && 'translate-y-[70%]'} transition-all duration-700 ease-in-out flex flex-col justify-center items-center gap-10 w-full`}>
-                
+              <div className={`${!loadingState && 'translate-y-[70%]'} transition-all duration-700 ease-in-out flex flex-col justify-center items-center gap-10 w-full`}>  
                 <div className='relative w-fit'>
-                <Search 
-                  searchHandler={searchHandler} 
-                  loadingState={loadingState} 
-                  query={query}
-                  setQuery={setQuery}
-                />
-                <LoadingIcon loadingState={loadingState}/>
+                  <Search 
+                    searchHandler={searchHandler} 
+                    loadingState={loadingState} 
+                    query={query}
+                    setQuery={setQuery}
+                  />
+                  <LoadingIcon loadingState={loadingState}/>
                 </div>
               </div>
               {loadingState === 'loaded' && (

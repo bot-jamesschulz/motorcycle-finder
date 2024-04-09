@@ -11,7 +11,6 @@ import {
     Sheet,
     SheetContent,
     SheetDescription,
-    SheetHeader,
     SheetTitle,
     SheetTrigger,
 } from "@/components/ui/sheet"
@@ -68,8 +67,6 @@ export function Filter({ query, setQuery}: FilterProps) {
         })
         return [options, selections]
     }, [query.filters.models, modelsInRange])
-
-    console.log('modelOptions', modelOptions, 'selection', modelSelections)
 
     // Get make counts for the given position
     useEffect( () => {
