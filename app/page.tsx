@@ -74,13 +74,9 @@ export default function Home() {
   useEffect(() => {  
     const fetchListings = async () => {
 
-      console.log('checking if we should fetch listings', query)
-
       if (!query.initialSearch || (query.endOfListings && query.pageNum)) return
 
       if (query.pageNum === 0) setLoadingState('loading')
-
-      console.log('fetching listings', query)
 
       if (!Supabase) return
 
@@ -98,10 +94,8 @@ export default function Home() {
         pageNum: query.pageNum
       })
 
-      console.log('listings', data)
-
       if (error) {
-        console.log('Error fetching listings', error)
+        console.error('Error fetching listings', error)
         return
       }
     
@@ -128,8 +122,6 @@ export default function Home() {
 
     const { location, keyword, range} = values
 
-    console.log('form values', values)
-
     setLoadingState('loading')
 
     const response = await fetch(`/api/getLocation?` + new URLSearchParams({
@@ -139,7 +131,7 @@ export default function Home() {
     if (response.ok) {
 
       const data: { x: number, y: number, zipCode: string } = await response.json()
-      console.log('location', data)
+
       setQuery((prev) => ({
         ...prev,
         keyword: keyword,

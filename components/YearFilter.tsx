@@ -58,7 +58,7 @@ export function YearFilter({ query, setQuery }: {query: Query, setQuery: SetQuer
         const selectedMaxYear = Number(val)
 
         if (selectedMaxYear === queryMax) return
-        console.log('years', queryMin, selectedMaxYear)
+
         if (!selectedMaxYear || 
             (queryMin > selectedMaxYear)
         ) {

@@ -34,7 +34,7 @@ export function Results({ listings, endOfListings, setQuery, loadingState }:  Se
 
     // Infinite scroll handler 
     const fetchTrigger = useCallback((node: HTMLAnchorElement) => {
-        console.log('endOfListings', endOfListings)
+
         if (!node) return
         if (loadingState === 'loading') return
         if (observer.current) observer.current.disconnect()

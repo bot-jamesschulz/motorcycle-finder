@@ -71,17 +71,14 @@ export function Filter({ query, setQuery}: FilterProps) {
     // Get make counts for the given position
     useEffect( () => {
         const fetchData = async () => {
-            console.log('fetching make count', {
-                ...query.position,
-                range: Number(query.position.range)
-            })
+        
             if (!Supabase) return
             const { data, error } = await Supabase.rpc('make_count_in_range', {
                 ...query.position,
                 range: milesToMeters(Number(query.position.range))
             })
             if (error) {
-                console.log('error getting makes', error)
+                console.error('error getting makes', error)
                 return
             }
             setMakesInRange(data)
@@ -94,7 +91,7 @@ export function Filter({ query, setQuery}: FilterProps) {
     useEffect( () => {
 
         const fetchData = async () => {
-            console.log('fetching model count', query.filters.makes)
+
             if (!Supabase) return
             const { data, error } = await Supabase.rpc('model_count_in_range', {
                 ...query.position,
@@ -102,7 +99,7 @@ export function Filter({ query, setQuery}: FilterProps) {
                 makeFilter: query.filters.makes
             })
             if (error) {
-                console.log('error getting makes', error)
+                console.error('error getting makes', error)
                 return
             }
         
@@ -111,8 +108,6 @@ export function Filter({ query, setQuery}: FilterProps) {
         fetchData()
         
     }, [query.filters.makes, query.position, setQuery])
-
-    console.log('filters', query.filters)
 
     return (
         <Sheet>

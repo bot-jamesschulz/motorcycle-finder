@@ -40,9 +40,7 @@ export function FilterTags({ query, setQuery, resetKeyword, resetLocation }: Fil
     const priceDescription = getPriceDescription(minPrice, maxPrice)
     const yearDescription = getYearDescription(minYear, maxYear)
     
-
     const makeUnselectHandler = (make: string) => {
-        console.log('checking make unselect', make)
 
         setQuery((prev) => {
         const newMakeFilter = prev.filters.makes.filter(m => m !== make)
