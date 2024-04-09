@@ -23,7 +23,6 @@ import { LocationMiss } from '@/components/LocationMiss'
 import { ThemeProvider } from '@/components/theme-provider'
 import LoadingIcon from '@/components/LoadingIcon'
 import { ModeToggle } from '@/components/ui/mode-toggle'
-import { FilterTags } from '@/components/FilterTags'
 import { milesToMeters } from '@/lib/utils'
 import { Database } from '@/lib/database.types'
 

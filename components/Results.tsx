@@ -15,7 +15,6 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
@@ -54,7 +53,7 @@ export function Results({ listings, endOfListings, setQuery, loadingState }:  Se
     return (
     <div className='flex flex-col justify-center items-center gap-4'>
         {listings.length && (
-            <h4 className="scroll-m-20 my-8 text-xl font-semibold tracking-tight">
+            <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
                 {listings[0].matchScore >= bestMatchThreshold 
                     ? 'Best Matches'
                     : 'Possible Matches'

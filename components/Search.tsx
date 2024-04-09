@@ -34,6 +34,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { Separator } from "@/components/ui/separator"
 import {
     Form,
     FormControl,
@@ -225,21 +226,23 @@ export function Search({
                             </div>
                         </div>
                         <div className={`flex ${loadingState === 'loaded' ? 'justify-start' : 'justify-center'} content-center gap-2`}>
+                        
                         <Button className="self-center h-9 w-1/4" type="submit">Search</Button>
-                            { loadingState && 
-                                <div className='flex items-center max-w-40 justify-between h-9 py-2 px-4 self-center grow basis-0 cursor-pointer'>
-                                    <Filter query={query} setQuery={setQuery}/>
-                                </div>                     
+                        { loadingState && 
+                            <div className='flex items-center max-w-40 justify-between h-9 py-2 px-4 self-center grow basis-0 cursor-pointer'>
+                                <Filter query={query} setQuery={setQuery}/>
+                            </div>                     
                         }
-                            { loadingState && 'loaded' && 
-                                <Sort className='self-center grow basis-0' 
-                                query={query}
-                                setQuery={setQuery} 
-                            />}
+                        { loadingState && 'loaded' && 
+                            <Sort className='self-center grow basis-0' 
+                            query={query}
+                            setQuery={setQuery} 
+                        />}
                         </div>
                     </div>
                 </form>
             </Form>
+            <Separator className='my-4'/>
             <FilterTags 
                 query={query}
                 setQuery={setQuery}

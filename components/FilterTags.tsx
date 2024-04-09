@@ -130,7 +130,7 @@ export function FilterTags({ query, setQuery, resetKeyword, resetLocation }: Fil
     }
     
     return (
-        <div className='my-2 flex flex-wrap gap-2'>
+        <div className='flex flex-wrap gap-2'>
             {query.keyword !== '' && <FilterTag title='KEYWORD' content={query.keyword} unselectHandler={keywordUnselectHandler} />}
             {query.position.range !== defaultMileRange && <FilterTag  title='LOCATION' content={locationDescription} unselectHandler={positionUnselectHandler} />}
             {JSON.stringify(query.filters.price) !== JSON.stringify(defaultPriceRange) && <FilterTag  title='PRICE' content={priceDescription} unselectHandler={priceUnselectHandler} />}
