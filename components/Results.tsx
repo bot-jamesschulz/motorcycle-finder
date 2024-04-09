@@ -15,7 +15,6 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
@@ -54,7 +53,7 @@ export function Results({ listings, endOfListings, setQuery, loadingState }:  Se
     return (
     <div className='flex flex-col justify-center items-center gap-4'>
         {listings.length && (
-            <h4 className="scroll-m-20 my-8 text-xl font-semibold tracking-tight">
+            <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
                 {listings[0].matchScore >= bestMatchThreshold 
                     ? 'Best Matches'
                     : 'Possible Matches'
@@ -94,7 +93,8 @@ export function Results({ listings, endOfListings, setQuery, loadingState }:  Se
                                         width={1000}
                                         height={1000}
                                         alt=''
-                                        className='object-cover w-full h-56 sm:w-56 sm:h-full rounded'
+                                        className='object-cover w-full h-56 sm:w-56 sm:h-full rounded transition-opacity opacity-0 duration-[0.5s]'
+                                        onLoadingComplete={(img) => img.classList.remove('opacity-0')}
                                     />    
                                 </div>     
                                 <div className='grow h-full flex flex-col justify-between w-full sm:w-3/4'>       
