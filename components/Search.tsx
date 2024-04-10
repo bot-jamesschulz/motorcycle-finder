@@ -67,6 +67,8 @@ export const FormSchema = z.object({
     range: z.enum(['10','25','50','75','100','200','500', '1000'])
 })
 
+const minSearchAutocomplete = 2
+
 export function Search({ 
         searchHandler, 
         loadingState,
@@ -106,7 +108,7 @@ export function Search({
 
                 const cityStates = optionsData.map(o => o.city_state)
 
-                if (optionsData[0].full_name_score === 1 || optionsData[0].zip_code_score === 1) {
+                if (optionsData[0].greatest_sml === 1) {
                     setOpen(false)
                     return
                 }
@@ -119,7 +121,7 @@ export function Search({
             }
         }
 
-        if (locationValue.length >= 3 && !locationOptionsRef.current.find(l => l.toLowerCase() === locationValue.toLowerCase())) {
+        if (locationValue.length >= minSearchAutocomplete && !locationOptionsRef.current.find(l => l.toLowerCase() === locationValue.toLowerCase())) {
             handleAutocomplete()
         } else {
             setOpen(false)
