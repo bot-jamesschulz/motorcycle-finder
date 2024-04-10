@@ -37,15 +37,12 @@ export function ModelFilter({
   modelsInRange
 }:  MultiSelectProps) {
 
-  
   const inputRef = React.useRef<HTMLInputElement>(null);
   const [open, setOpen] = React.useState(false);
   const [inputValue, setInputValue] = React.useState("");
   const modelFilter = query.filters.models
   const makeFilter = query.filters.makes
   const modelFilterValues = modelFilter.map(m => m.model)
-
-  console.log(`modelFilter, models`, modelFilter)
 
   const handleSelect = React.useCallback((option: Option) => {
 

@@ -1,6 +1,7 @@
 import { type NextRequest } from 'next/server'
 import fuse from '@/lib/fuse'
 
+
 export async function GET(request: NextRequest) {
 
     // Extract query params
@@ -8,8 +9,6 @@ export async function GET(request: NextRequest) {
         .nextUrl
         .searchParams
         .get('location')
-    
-        console.log('location queryParam', location)
 
     if (!location) return Response.json([]);
 
@@ -25,12 +24,8 @@ export async function GET(request: NextRequest) {
     }
 
     const coords = { x: match.item.longitude, y: match.item.latitude }
-    
-    console.log('matched location', match);
-	console.log('coordinates', coords);
 
-
-return Response.json({ x: coords.x, y: coords.y, zipCode: match.item.zipCode })
+    return Response.json({ x: coords.x, y: coords.y, zipCode: match.item.zipCode })
 }
 
 

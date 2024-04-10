@@ -6,14 +6,11 @@ export async function GET(request: NextRequest) {
 	const searchParams = request.nextUrl.searchParams
 	const searchPattern = searchParams.get('searchValue');
 
-	console.log('before fuze autocomplete:', new Date())
-
 	if (!searchPattern) return Response.json([]);
 
 	const fuseResults = fuse.search(searchPattern);
 
 	const locationOptions: string[] = []
-
 
 	for (const res of fuseResults) {
 		
@@ -23,7 +20,6 @@ export async function GET(request: NextRequest) {
 
 		if (res?.score < 0.0001 &&
 			res.matches[0].key === 'zipCode') {
-			console.log(res)
 			break
 		}
 
@@ -34,8 +30,6 @@ export async function GET(request: NextRequest) {
 		}
 
 	};
-
-	console.log('after fuze autocomplete:', new Date())
 
 	return Response.json(locationOptions)
 }
