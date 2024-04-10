@@ -16,6 +16,7 @@ import {
   Results, 
   NoResults
 } from '@/components/Results'
+import { SubmitHandler } from "react-hook-form"
 import { defaultQuery } from '@/lib/defaults'
 import type { SortMethod } from '@/components/Sort'
 import type { ModelOption } from '@/components/ModelFilter'
@@ -38,7 +39,7 @@ export type Position = {
   range: MileRange
 }
 type Filters = {
-  makes: string[],
+  makes: string[]
   models: ModelOption[]
   price: PriceRange
   hideNullPrices: boolean
@@ -52,6 +53,7 @@ export type Query = {
   filters: Filters
   position: Position
   zipCode: string
+  cityState: string
   initialSearch: boolean
 }
 export type SetQuery = Dispatch<SetStateAction<Query>>
@@ -118,37 +120,37 @@ export default function Home() {
 
 
   // Search submission
-  const searchHandler = useCallback(async (values: SearchFormSchemaType) => {
+  const searchHandler: SubmitHandler<SearchFormSchemaType> = useCallback(async (values: SearchFormSchemaType) => {
 
     const { location, keyword, range} = values
 
     setLoadingState('loading')
 
-    const response = await fetch(`/api/getLocation?` + new URLSearchParams({
-      location: location
-    }));
+    const res = await Supabase
+      .rpc('autocomplete', { search: location})
+            
+    const data = res.data?.[0]
 
-    if (response.ok) {
-
-      const data: { x: number, y: number, zipCode: string } = await response.json()
+    if (data) {
 
       setQuery((prev) => ({
         ...prev,
         keyword: keyword,
         position: {
-          x: data.x,
-          y: data.y,
+          x: data.longitude,
+          y: data.latitude,
           range
         }, 
-        zipCode: data.zipCode,
+        zipCode: data.zip_code,
+        cityState: data.city_state,
         pageNum: 0,
         initialSearch: true,
         endOfListings: false
       }))
 
     } else { 
-      console.error(response.status)
-      if (response.status === 404) setLoadingState('location not found')
+      console.error('No results')
+      setLoadingState('location not found')
     }
   }, [])
 
@@ -174,6 +176,7 @@ export default function Home() {
                     loadingState={loadingState} 
                     query={query}
                     setQuery={setQuery}
+                    Supabase={Supabase}
                   />
                   <LoadingIcon loadingState={loadingState}/>
                 </div>
