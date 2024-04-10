@@ -22,7 +22,8 @@ import { PriceFilter } from '@/components/PriceFilter'
 import { YearFilter } from '@/components/YearFilter'
 import type { 
     Query,
-    SetQuery 
+    SetQuery,
+    SupabasePublic
 } from '@/app/page'
 
 
@@ -33,14 +34,10 @@ type ModelCount = Database['public']['Functions']['model_count_in_range']['Retur
 type FilterProps = {
     query: Query
     setQuery: SetQuery
+    Supabase: SupabasePublic
 }
 
-let Supabase = createClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
-
-export function Filter({ query, setQuery}: FilterProps) {
+export function Filter({ query, setQuery, Supabase}: FilterProps) {
     const [makesInRange, setMakesInRange] = useState<MakeCount[]>([])
     const [modelsInRange, setModelsInRange] = useState<ModelCount[]>([])
 
@@ -68,15 +65,19 @@ export function Filter({ query, setQuery}: FilterProps) {
         return [options, selections]
     }, [query.filters.models, modelsInRange])
 
-    // Get make counts for the given position
+    // Get make counts
     useEffect( () => {
         const fetchData = async () => {
         
             if (!Supabase) return
             const { data, error } = await Supabase.rpc('make_count_in_range', {
                 ...query.position,
-                range: milesToMeters(Number(query.position.range))
+                range: milesToMeters(Number(query.position.range)),
+                price_filter: query.filters.price,
+                year_filter: query.filters.year,
+                hide_null_prices: query.filters.hideNullPrices
             })
+
             if (error) {
                 console.error('error getting makes', error)
                 return
@@ -85,7 +86,7 @@ export function Filter({ query, setQuery}: FilterProps) {
         }
         fetchData()
         
-    }, [query.position])
+    }, [query.position, query.filters.price, query.filters.year, query.filters.hideNullPrices, Supabase])
 
     // Get model counts
     useEffect( () => {
@@ -96,7 +97,10 @@ export function Filter({ query, setQuery}: FilterProps) {
             const { data, error } = await Supabase.rpc('model_count_in_range', {
                 ...query.position,
                 range: milesToMeters(Number(query.position.range)),
-                makeFilter: query.filters.makes
+                make_filter: query.filters.makes,
+                price_filter: query.filters.price,
+                year_filter: query.filters.year,
+                hide_null_prices: query.filters.hideNullPrices  
             })
             if (error) {
                 console.error('error getting makes', error)
@@ -107,7 +111,7 @@ export function Filter({ query, setQuery}: FilterProps) {
         }
         fetchData()
         
-    }, [query.filters.makes, query.position, setQuery])
+    }, [query.filters.makes, query.position, query.filters.price, query.filters.year, query.filters.hideNullPrices, Supabase])
 
     return (
         <Sheet>
