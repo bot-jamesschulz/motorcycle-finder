@@ -108,6 +108,7 @@ export function Search({
 
                 if (optionsData[0].full_name_score === 1 || optionsData[0].zip_code_score === 1) {
                     setOpen(false)
+                    return
                 }
 
                 locationOptionsRef.current = cityStates
