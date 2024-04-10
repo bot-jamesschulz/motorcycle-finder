@@ -101,8 +101,6 @@ export function Search({
                 .rpc('autocomplete', { search: locationValue})
             
             const optionsData = res.data
-
-            console.log(optionsData?.[0])
             
             if (Array.isArray(optionsData) && optionsData.length && !ignore) {
 
