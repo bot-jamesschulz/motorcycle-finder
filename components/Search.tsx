@@ -6,6 +6,8 @@ import {
     useRef,
     useCallback
 } from "react"
+import { type Database } from '@/lib/database.types'
+import { SupabaseClient } from '@supabase/supabase-js'
 import { SubmitHandler } from "react-hook-form"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -55,7 +57,8 @@ type SearchProps = {
     searchHandler: SubmitHandler<SearchFormSchemaType>
     loadingState: Loading
     query: Query,
-    setQuery: SetQuery
+    setQuery: SetQuery,
+    Supabase: SupabaseClient<Database, 'public', Database['public']>
 }
 
 export const FormSchema = z.object({
@@ -68,7 +71,8 @@ export function Search({
         searchHandler, 
         loadingState,
         query,
-        setQuery
+        setQuery,
+        Supabase
     }: SearchProps) {
     const [open, setOpen] = useState(false)
     const locationOptionsRef = useRef<string[]>([])
@@ -91,21 +95,30 @@ export function Search({
     // Autocomplete
     useEffect(() => {
         let ignore = false
+
         const handleAutocomplete = async () => {
-            const res = await fetch(`api/locationAutocomplete?` + new URLSearchParams({
-                searchValue: locationValue
-            }))
-            const body = await res.json()
-            locationOptionsRef.current = body
-            if (Array.isArray(body) && body.length && !ignore) {
-                setLocationOptions(body)
+            const res = await Supabase
+                .rpc('autocomplete', { search: locationValue})
+            
+            const optionsData = res.data
+            
+            if (Array.isArray(optionsData) && optionsData.length && !ignore) {
+
+                const cityStates = optionsData.map(o => o.city_state)
+
+                if (optionsData[0].full_name_score === 1 || optionsData[0].zip_code_score === 1) {
+                    setOpen(false)
+                }
+
+                locationOptionsRef.current = cityStates
+                setLocationOptions(cityStates)
                 setOpen(true)
             } else {
                 setOpen(false)
             }
         }
-       
-        if (locationValue !== query.zipCode && locationValue.length >= 3 && !locationOptionsRef.current.find(l => l.toLowerCase() === locationValue.toLowerCase())) {
+
+        if (locationValue.length >= 3 && !locationOptionsRef.current.find(l => l.toLowerCase() === locationValue.toLowerCase())) {
             handleAutocomplete()
         } else {
             setOpen(false)
@@ -114,7 +127,8 @@ export function Search({
         return () => {
             ignore = true
         }
-    },[locationValue, query.zipCode])
+    },[locationValue, Supabase])
+
 
     // Reset keyword when tag is removed
     const resetKeyword = useCallback(() => {

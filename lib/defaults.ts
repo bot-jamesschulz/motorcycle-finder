@@ -9,6 +9,7 @@ import type { SortMethod } from '@/components/Sort'
 
 export const defaultSort: SortMethod = 'Relevance'
 export const defaultZip = '93654'
+export const defaultCityState = 'Reedley, California'
 export const defaultMileRange: MileRange = '1000'
 export const defaultPriceRange: PriceRange  = [0, 1_000_000]
 export const defaultPosition: Position = {
@@ -38,5 +39,6 @@ export const defaultQuery: Query = {
     },
     position: defaultPosition,
     zipCode: defaultZip,
+    cityState: defaultCityState,
     initialSearch: false
   }
