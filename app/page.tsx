@@ -186,6 +186,7 @@ export default function Home() {
                   <Results 
                     endOfListings={query.endOfListings}
                     listings={listings} 
+                    keyword={query.keyword}
                     setQuery={setQuery}
                     loadingState={loadingState}
                   />

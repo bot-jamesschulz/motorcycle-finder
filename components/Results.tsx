@@ -23,13 +23,14 @@ import { MapPin, Gauge, Ruler } from 'lucide-react';
 type SearchProps = {
     listings: ListingsRow[]
     endOfListings: boolean
+    keyword: string
     setQuery: Dispatch<SetStateAction<Query>>
     loadingState: Loading
 }
 
 export const bestMatchThreshold = 1.1
 
-export function Results({ listings, endOfListings, setQuery, loadingState }:  SearchProps ) {
+export function Results({ listings, endOfListings, keyword, setQuery, loadingState }:  SearchProps ) {
     const observer = useRef<IntersectionObserver>()
 
     // Infinite scroll handler 
@@ -54,9 +55,10 @@ export function Results({ listings, endOfListings, setQuery, loadingState }:  Se
     <div className='flex flex-col justify-center items-center gap-4'>
         {listings.length && (
             <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
-                {listings[0].matchScore >= bestMatchThreshold 
-                    ? 'Best Matches'
-                    : 'Possible Matches'
+                {keyword === '' ? 'Matches' : 
+                    listings[0].matchScore >= bestMatchThreshold 
+                        ? 'Best Matches'
+                        : 'Possible Matches'
 
                 }
             </h4>
