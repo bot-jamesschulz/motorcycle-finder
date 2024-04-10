@@ -246,7 +246,7 @@ export function Search({
                         
                         <Button className="self-center h-9 w-1/4" type="submit">Search</Button>
                         { loadingState && 
-                            <div className='flex items-center max-w-40 justify-between h-9 py-2 px-4 self-center grow basis-0 cursor-pointer'>
+                            <div className='flex items-center max-w-40 justify-between h-9 py-2 px-4 self-center grow basis-0'>
                                 <Filter query={query} setQuery={setQuery} Supabase={Supabase}/>
                             </div>                     
                         }

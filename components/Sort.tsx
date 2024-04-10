@@ -32,9 +32,9 @@ export function Sort({ query, setQuery, className }: SortProps) {
 
     return (
         <div className={`${className} flex justify-center items-center gap-2`}>
-            <ArrowDownWideNarrow strokeWidth={1.75} size={20} className='min-w-5'/>
             <Select onValueChange={valueChangeHandler}>
-                <SelectTrigger className='border-none text-base text-left pl-0 max-w-52 min-w-[95px]'>
+                <SelectTrigger className='border-none text-base text-left max-w-52 min-w-[95px]'>
+                    <ArrowDownWideNarrow strokeWidth={1.75} size={20} className='min-w-5 mr-1'/>
                     <SelectValue placeholder={<span>Sort By <span className='font-semibold'>{query.sortMethod}</span></span>} />
                 </SelectTrigger>
                 <SelectContent>
