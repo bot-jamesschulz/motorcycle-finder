@@ -101,6 +101,8 @@ export function Search({
                 .rpc('autocomplete', { search: locationValue})
             
             const optionsData = res.data
+
+            console.log(optionsData?.[0])
             
             if (Array.isArray(optionsData) && optionsData.length && !ignore) {
 
@@ -108,6 +110,7 @@ export function Search({
 
                 if (optionsData[0].full_name_score === 1 || optionsData[0].zip_code_score === 1) {
                     setOpen(false)
+                    return
                 }
 
                 locationOptionsRef.current = cityStates
