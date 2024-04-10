@@ -4,7 +4,7 @@ import {
   SearchFormSchemaType, 
   Search
 } from '@/components/Search'
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { 
   useState, 
   useCallback, 
@@ -45,6 +45,7 @@ type Filters = {
   hideNullPrices: boolean
   year: YearRange
 }
+export type SupabasePublic = SupabaseClient<Database, 'public', Database['public']>
 export type Query = {
   keyword: string
   pageNum: number
