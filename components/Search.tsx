@@ -243,8 +243,7 @@ export function Search({
                             </div>
                         </div>
                         <div className={`flex ${loadingState === 'loaded' ? 'justify-start' : 'justify-center'} content-center gap-2`}>
-                        
-                        <Button className="self-center h-9 w-1/4" type="submit">Search</Button>
+                        <Button className="self-center mr-4 h-9 grow basis-0" type="submit">Search</Button>
                         { loadingState && 
                             <div className='flex items-center max-w-40 justify-between h-9 py-2 px-4 self-center grow basis-0'>
                                 <Filter query={query} setQuery={setQuery} Supabase={Supabase}/>
