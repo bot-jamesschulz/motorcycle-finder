@@ -223,7 +223,7 @@ export function Search({
                                         <FormControl>
                                             <Select key={key} value={selectValue} onValueChange={field.onChange}>
                                                 <SelectTrigger className="w-full min-w-[100px]">
-                                                    <SelectValue placeholder='Radius'/>
+                                                    <SelectValue placeholder='Statewide'/>
                                                 </SelectTrigger>
                                                 <SelectContent>
                                                     <SelectItem value="1000">Statewide</SelectItem>
