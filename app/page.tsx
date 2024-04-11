@@ -193,7 +193,7 @@ export default function Home() {
           </div> 
         </main>
         <footer className='flex flex-col justify-center items-center w-full py-4 bg-slate-200 dark:bg-slate-950 dark:text-slate-50 text-center rounded-2xl'>
-          <div className='w-3/4 font-light flex flex-col justify-center items-center '>
+          <div className='w-3/4 font-light flex flex-col justify-center items-center gap-2'>
             <h2 className="text-lg tracking-tight">
               Motorcycle Finder currently only aggregates <span className='font-normal'>California dealerships</span>.
               <Separator className='bg-slate-800 dark:bg-slate-200 w-3/4 mx-auto'/>
