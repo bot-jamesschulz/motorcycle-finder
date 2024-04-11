@@ -21,11 +21,12 @@ import { defaultQuery } from '@/lib/defaults'
 import type { SortMethod } from '@/components/Sort'
 import type { ModelOption } from '@/components/ModelFilter'
 import { LocationMiss } from '@/components/LocationMiss'
-import { ThemeProvider } from '@/components/theme-provider'
 import LoadingIcon from '@/components/LoadingIcon'
 import { ModeToggle } from '@/components/ui/mode-toggle'
+import { Separator } from "@/components/ui/separator"
 import { milesToMeters } from '@/lib/utils'
 import { Database } from '@/lib/database.types'
+import { Mail } from 'lucide-react';
 
 export type PriceRange = [number, number]
 export type YearRange = [number, number]
@@ -156,47 +157,54 @@ export default function Home() {
   }, [])
 
   return (
-    <body>
-      <ThemeProvider
-        attribute="class"
-        defaultTheme="system"
-        enableSystem
-        disableTransitionOnChange
-      >
-        <div className="relative">
-          <div className="absolute top-0 right-0 m-4">
-            <ModeToggle />
+    <div className='flex flex-col justify-between min-h-screen'>
+        <main>
+          <div className="relative">
+            <div className="absolute top-0 right-0 m-4">
+              <ModeToggle />
+            </div>
           </div>
-        </div>
-        <div className={`flex justify-center items-center`}>
-          <div className="flex flex-col justify-center items-center w-full p-3 gap-2">
-              <div className={`${!loadingState && 'translate-y-[70%]'} transition-all duration-700 ease-in-out flex flex-col justify-center items-center gap-10 w-full`}>  
-                <div className='relative w-fit'>
-                  <Search 
-                    searchHandler={searchHandler} 
-                    loadingState={loadingState} 
-                    query={query}
-                    setQuery={setQuery}
-                    Supabase={Supabase}
-                  />
-                  <LoadingIcon loadingState={loadingState}/>
+          <div className={`flex justify-center items-center`}>
+            <div className="flex flex-col justify-center items-center w-full p-3 gap-2">
+                <div className={`${!loadingState && 'translate-y-[70%]'} transition-all duration-700 ease-in-out flex flex-col justify-center items-center gap-10 w-full`}>  
+                  <div className='relative w-fit'>
+                    <Search 
+                      searchHandler={searchHandler} 
+                      loadingState={loadingState} 
+                      query={query}
+                      setQuery={setQuery}
+                      Supabase={Supabase}
+                    />
+                    <LoadingIcon loadingState={loadingState}/>
+                  </div>
                 </div>
-              </div>
-              {loadingState === 'loaded' && (
-                  <Results 
-                    endOfListings={query.endOfListings}
-                    listings={listings} 
-                    keyword={query.keyword}
-                    setQuery={setQuery}
-                    loadingState={loadingState}
-                  />
-              )}
-              {loadingState === 'no results' && <NoResults />}
-              {loadingState === 'location not found' && <LocationMiss />}
+                {loadingState === 'loaded' && (
+                    <Results 
+                      endOfListings={query.endOfListings}
+                      listings={listings} 
+                      keyword={query.keyword}
+                      setQuery={setQuery}
+                      loadingState={loadingState}
+                    />
+                )}
+                {loadingState === 'no results' && <NoResults />}
+                {loadingState === 'location not found' && <LocationMiss />}
+            </div>
+          </div> 
+        </main>
+        <footer className='flex flex-col justify-center items-center w-full py-4 bg-slate-200 dark:bg-slate-950 dark:text-slate-50 text-center rounded-2xl'>
+          <div className='w-3/4 font-light flex flex-col justify-center items-center '>
+            <h2 className="text-lg tracking-tight">
+              Motorcycle Finder currently only aggregates <span className='font-normal'>California dealerships</span>.
+              <Separator className='bg-slate-800 dark:bg-slate-200 w-3/4 mx-auto'/>
+            </h2>
+            
+            <p> 
+              <span className='flex items-center gap-2 text-sm'><Mail size={17}/> botjameschulz@gmail.com</span>
+            </p>
           </div>
-        </div>
-      </ThemeProvider>
-    </body>
+        </footer>
+    </div>
   );
 }
 
