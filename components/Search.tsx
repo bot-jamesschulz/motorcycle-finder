@@ -163,7 +163,7 @@ export function Search({
     }, [open])
 
     return  (
-        <div className='flex flex-col'>
+        <div className='flex flex-col '>
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(searchHandler)} className="flex flex-col gap-5 w-full">
                     <div className="flex flex-col gap-5 w-full h-1/2 max-w-2xl"> 
