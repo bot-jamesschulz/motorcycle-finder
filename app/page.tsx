@@ -193,7 +193,7 @@ export default function Home() {
           </div> 
         </main>
         {!loadingState && 
-          <div className='mt-48 mb-12 sm:mt-8 flex-col mx-auto w-3/4 rounded-xl p-8 border bg-slate-50 shadow'>
+          <div className='mt-48 mb-12 sm:mt-8 flex-col mx-auto w-full max-w-2xl rounded-xl p-8'>
             <p className='text-2xl font-semibold'>Motorcycle Finder <span className='font-normal text-base'>offers the most complete dataset of dealership listings. Listings are sourced directly from each dealer&apos;s website, so it&apos;s not necessary for them to share their inventory in order for their listings to show up.</span></p>
           </div>}
         <footer className='flex flex-col justify-center items-center w-full py-4 bg-slate-200 shadow dark:bg-slate-950 dark:text-slate-50 text-center rounded-t-2xl'>
