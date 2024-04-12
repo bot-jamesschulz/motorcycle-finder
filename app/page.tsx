@@ -193,8 +193,8 @@ export default function Home() {
           </div> 
         </main>
         {!loadingState && 
-          <div className='mt-48 mb-12 sm:mt-8 flex-col mx-auto w-3/4 rounded-2xl p-8 border bg-slate-200 shadow'>
-            <p className='text-2xl font-semibold'>Motorcycle Finder <span className='font-light text-base'>offers the most complete dataset of dealership listings. Listings are sourced directly from each dealer&apos;s website, so we don&apos;t have to rely on them sending us their inventory.</span></p>
+          <div className='mt-48 mb-12 sm:mt-8 flex-col mx-auto w-3/4 rounded-xl p-8 border bg-slate-200'>
+            <p className='text-2xl font-semibold'>Motorcycle Finder <span className='font-normal text-base'>offers the most complete dataset of dealership listings. Listings are sourced directly from each dealer&apos;s website, so we don&apos;t have to rely on them sending us their inventory.</span></p>
           </div>}
         <footer className='flex flex-col justify-center items-center w-full py-4 bg-slate-200 shadow dark:bg-slate-950 dark:text-slate-50 text-center rounded-t-2xl'>
           <div className='w-3/4 font-light flex flex-col justify-center items-center gap-2'>
