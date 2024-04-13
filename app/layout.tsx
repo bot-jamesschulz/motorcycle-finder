@@ -8,7 +8,7 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Motorcycle Finder",
-  description: "Find your next motorcycle",
+  description: "Find your next motorcycle, with the most comprehensive database of motorcycle listings available.",
 };
 
 export default function RootLayout({
