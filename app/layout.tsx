@@ -7,7 +7,7 @@ import { ThemeProvider } from '@/components/theme-provider'
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Motorcycle Finder",
+  title: "Motorcycle Finder: New and Used Dealership motorcycles for sale.",
   description: "Find your next motorcycle, with the most comprehensive database of new and used dealership motorcycle listings available.",
 };
 
