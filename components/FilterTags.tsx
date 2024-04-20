@@ -126,7 +126,7 @@ export function FilterTags({
     }
 
     return (
-        <div className='flex flex-wrap gap-2'>
+        <div className='flex flex-wrap gap-2 px-2'>
             {keywordFilter !== '' && <FilterTag title='KEYWORD' content={keywordFilter} unselectHandler={keywordUnselectHandler} />}
             {rangeFilter && rangeFilter !== defaultMileRange && <FilterTag  title='LOCATION' content={locationDescription} unselectHandler={positionUnselectHandler} />}
             {JSON.stringify(priceFilter) !== JSON.stringify(defaultPriceRange) && <FilterTag  title='PRICE' content={priceDescription} unselectHandler={priceUnselectHandler} />}
