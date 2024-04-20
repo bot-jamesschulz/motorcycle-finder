@@ -23,7 +23,7 @@ import { MapPin, Gauge, Ruler } from "lucide-react"
 export type Loading = 'loading' | 'loaded' | 'no results' |'location not found' | undefined
 export type ListingsRow = Database['public']['Functions']['proximity_search']['Returns'][0]
 
-export const bestMatchThreshold = 1.1;
+const bestMatchThreshold = 1.1;
 
 export default function Results() {
     const Supabase = useSupabaseContext()
