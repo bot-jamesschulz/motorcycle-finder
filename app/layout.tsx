@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import "@/styles/globals.css"
 import { Footer } from '@/components/Footer'
+import { Suspense } from 'react'
 import { 
   Search
 } from '@/components/Search'
@@ -33,21 +34,23 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <div className="absolute top-0 right-0 m-4">
-            <ModeToggle />
-          </div>
-          <LoadingContextProvider>
-            <SupabaseContextProvider>
-                <Search />
-                <main>
-                {children}
-                </main>
-                <Analytics />  
-            </SupabaseContextProvider>
-          </LoadingContextProvider>
-          <footer className='flex flex-col justify-center items-center w-full py-4 bg-slate-200 shadow dark:bg-slate-950 dark:text-slate-50 text-center rounded-t-2xl'>
-            <Footer />
-          </footer>
+          <Suspense>
+            <div className="absolute top-0 right-0 m-4">
+              <ModeToggle />
+            </div>
+            <LoadingContextProvider>
+              <SupabaseContextProvider>
+                  <Search />
+                  <main>
+                  {children}
+                  </main>
+                  <Analytics />  
+              </SupabaseContextProvider>
+            </LoadingContextProvider>
+            <footer className='flex flex-col justify-center items-center w-full py-4 bg-slate-200 shadow dark:bg-slate-950 dark:text-slate-50 text-center rounded-t-2xl'>
+              <Footer />
+            </footer>
+          </Suspense>
         </ThemeProvider>
       </body>
     </html>
