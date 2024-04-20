@@ -64,11 +64,13 @@ export function Paginate({ className, resultsCount }: PaginateProps) {
                         )}
                     </PaginationContent>
                 )}
-                <PaginationContent>
-                    <PaginationItem>
-                        <PaginationLink className='text-lg hover:bg-transparent hover:cursor-default'>{currPage}</PaginationLink>
-                    </PaginationItem>
-                </PaginationContent>
+                {pageCount >= 1 && (
+                    <PaginationContent>
+                        <PaginationItem>
+                            <PaginationLink className='text-lg hover:bg-transparent hover:cursor-default'>{currPage}</PaginationLink>
+                        </PaginationItem>
+                    </PaginationContent>
+                )}
                 {pageCount > 1 && currPage < pageCount && (
                     <PaginationContent>
                         {(pageCount - currPage) > 1 && (
