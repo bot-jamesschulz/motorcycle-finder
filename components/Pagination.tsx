@@ -25,25 +25,39 @@ export function Paginate({ className, resultsCount }: PaginateProps) {
     const currResults = currPage * pageSize
     const pageCount = Math.floor(resultsCount / pageSize)
 
+    const nextPageParams = currSearch
+    nextPageParams.set('page', (Number(currPage) + 1).toString())
+    const nextPageHref = `${pathname}?${nextPageParams}`
+
+    const prevPageParams = currSearch
+    prevPageParams.set('page', (Number(currPage) - 1).toString())
+    const prevPageHref = `${pathname}?${prevPageParams}`
+
+    const firstPageParams = currSearch
+    firstPageParams.set('page', '1')
+    const firstPageHref = `${pathname}?${firstPageParams}`
+
+    const lastPageParams = currSearch
+    lastPageParams.set('page', pageCount.toString())
+    const lastPageHref = `${pathname}?${lastPageParams}`
+
     const firstPageHandler = () => {
-        currSearch.set('page', '1')
-        router.push(`${pathname}?${currSearch.toString()}`);
+        router.push(firstPageHref);
     }
 
     const lastPageHandler = () => {
-        currSearch.set('page', pageCount.toString())
-        router.push(`${pathname}?${currSearch.toString()}`);
+        router.push(lastPageHref);
     }
 
     const nextPageHandler = () => {
-        currSearch.set('page', (Number(currPage) + 1).toString())
-        router.push(`${pathname}?${currSearch.toString()}`);
+        router.push(nextPageHref);
     }
 
     const prevPageHandler = () => {
         currSearch.set('page', (Number(currPage) - 1).toString())
-        router.push(`${pathname}?${currSearch.toString()}`);
+        router.push(prevPageHref);
     }
+
 
 
     return (
@@ -52,10 +66,10 @@ export function Paginate({ className, resultsCount }: PaginateProps) {
                 {currPage > 1 && (
                     <PaginationContent>
                         <PaginationItem>
-                            <PaginationPrevious href="#" onClick={prevPageHandler}/>
+                            <PaginationPrevious href={prevPageHref}/>
                         </PaginationItem>
                         <PaginationItem>
-                            <PaginationLink href="#" onClick={firstPageHandler}>1</PaginationLink>
+                            <PaginationLink href={firstPageHref} onClick={firstPageHandler}>1</PaginationLink>
                         </PaginationItem>
                         {currPage > 2 && (
                             <PaginationItem>
@@ -67,7 +81,7 @@ export function Paginate({ className, resultsCount }: PaginateProps) {
                 {pageCount >= 1 && (
                     <PaginationContent>
                         <PaginationItem>
-                            <PaginationLink className='text-lg hover:bg-transparent hover:cursor-default'>{currPage}</PaginationLink>
+                            <PaginationLink href="#" className='text-lg hover:bg-transparent hover:cursor-default'>{currPage}</PaginationLink>
                         </PaginationItem>
                     </PaginationContent>
                 )}
@@ -79,10 +93,10 @@ export function Paginate({ className, resultsCount }: PaginateProps) {
                             </PaginationItem>
                         )}
                         <PaginationItem>
-                            <PaginationLink href="#" onClick={lastPageHandler}>{pageCount}</PaginationLink>
+                            <PaginationLink href={lastPageHref}>{pageCount}</PaginationLink>
                         </PaginationItem>
                         <PaginationItem>
-                            <PaginationNext href="#" onClick={nextPageHandler}/>
+                            <PaginationNext href={nextPageHref} />
                         </PaginationItem>
                     </PaginationContent>
                 )}
