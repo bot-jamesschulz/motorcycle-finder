@@ -8,84 +8,93 @@ import {
   CommandGroup,
   CommandItem,
 } from "@/components/ui/command"
-import type { 
-  Query,
-  SetQuery
-} from '@/app/page'
-import type { Option } from '@/components/Filter'
+import type { Option } from '@/components/Filters'
+import type { ModelCount } from '@/components/Search'
 import { Command as CommandPrimitive } from "cmdk"
+import { 
+  useSearchParams, 
+  useRouter, 
+  usePathname 
+} from "next/navigation"
 
 type MultiSelectProps = {
   options: Option[]
-  query: Query
-  setQuery: SetQuery
-  selected?: string[]
+  makeFilter: string[]
+  modelsInRange: ModelCount[]
 }
 
 export function MakeFilter({ 
-  options, 
-  query,
-  setQuery,
+  options,
+  makeFilter,
+  modelsInRange
 }:  MultiSelectProps) {
 
-  
+  const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
   const inputRef = React.useRef<HTMLInputElement>(null)
   const [open, setOpen] = React.useState(false)
   const [inputValue, setInputValue] = React.useState("")
-  const queryFilters = query.filters.makes
+  const currSearch = new URLSearchParams(searchParams)
 
-  const handleUnselect = React.useCallback((option: String) => {
-    setQuery((prev) => {
-      const newMakeFilter = prev.filters.makes.filter(m => m !== option)
-      
-      return {
-        ...prev,
-        pageNum: 0,
-        endOfListings: false,
-        filters: {
-            ...prev.filters,
-            makes: newMakeFilter,
-            models: prev.filters.models.filter(m => newMakeFilter.includes(m.make))
-        }
-      }
-    })
-  }, [setQuery])
 
-  const handleSelect = React.useCallback((option: Option) => {
+  const handleSelect = (option: Option) => {
     
     setInputValue("")
     inputRef?.current?.blur()
     setOpen(false)
-    setQuery((prev) => ({
-      ...prev,
-      pageNum: 0,
-      endOfListings: false,
-      filters: {
-          ...prev.filters,
-          makes: [...prev.filters.makes, option.value]
-      }
-    }))
-  }, [setQuery])
 
-  const handleKeyDown = React.useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
+    currSearch.set('page', '1')
+    currSearch.append('make', option.value)
+    router.push(`${pathname}?${currSearch.toString()}`);
+  }
+
+  const handleUnselect = (make: String) => {
+  
+    currSearch.set('page', '1')
+    const newMakeFilter = currSearch.getAll('make').filter(m => m !== make)
+    currSearch.delete('make')
+    newMakeFilter.forEach((m) => {
+      currSearch.append('make', m)
+    })
+
+    const newModelFilter = currSearch.getAll('model')
+    currSearch.delete('model')
+    newModelFilter.forEach((m) => {
+      const make = modelsInRange.find(opt => opt.model === m)?.make
+      if (make && newMakeFilter.includes(make)) {
+        currSearch.append('model', m)
+      }
+    })
+
+    router.push(`${pathname}?${currSearch.toString()}`)
+
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     const input = inputRef.current
     if (input) {
       if (e.key === "Delete" || e.key === "Backspace") {
         if (input.value === "") {
-          setQuery((prev) => {
-            const newSelected = [...prev.filters.makes]
-            newSelected.pop()
-            return {
-              ...prev,
-              pageNum: 0,
-              endOfListings: false,
-              filters: {
-                ...prev.filters,
-                makes: newSelected
-              }
+          const lastElem = makeFilter[makeFilter.length - 1]
+
+          currSearch.set('page', '1')
+          const newMakeFilter = currSearch.getAll('make').filter(m => m !== lastElem)
+          currSearch.delete('make')
+          newMakeFilter.forEach((m) => {
+            currSearch.append('make', m)
+          })
+
+          const newModelFilter = currSearch.getAll('model')
+          currSearch.delete('model')
+          newModelFilter.forEach((m) => {
+            const make = modelsInRange.find(opt => opt.model === m)?.make
+            if (make && newMakeFilter.includes(make)) {
+              currSearch.append('model', m)
             }
           })
 
+          router.push(`${pathname}?${currSearch.toString()}`)
         }
       }
       // This is not a default behaviour of the <input /> field
@@ -93,17 +102,16 @@ export function MakeFilter({
         input.blur()
       }
     }
-  }, [setQuery])
+  }
 
-  const selectables = options.filter(option => !queryFilters.includes(option.value))
-
+  const selectables = options.filter(option => !makeFilter.includes(option.value))
   return (
     <Command onKeyDown={handleKeyDown} className="overflow-visible bg-transparent">
       <div
         className="group border border-input px-3 py-2 text-sm ring-offset-background rounded-md focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2"
       >
         <div className="flex gap-1 flex-wrap">
-          {queryFilters.map((option) => {
+          {makeFilter.map((option) => {
             return (
               <Badge key={option} variant="secondary">
                 {option}

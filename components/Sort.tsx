@@ -1,9 +1,5 @@
 'use client'
 
-import type { 
-    Query, 
-    SetQuery
-} from '@/app/page'
 import {
     Select,
     SelectContent,
@@ -11,23 +7,27 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
-import { ArrowDownWideNarrow } from 'lucide-react';
+import { useSearchParams, useRouter, usePathname } from "next/navigation"
+import { ArrowDownWideNarrow } from 'lucide-react'
+import { defaultSort } from '@/lib/defaults'
 
 export type SortMethod = 'Relevance' | 'Nearest' | 'Highest Price' | 'Lowest Price' 
 type SortProps = {
-    query: Query
-    setQuery: SetQuery
     className: string | undefined
 }
 
-export function Sort({ query, setQuery, className }: SortProps) {
+export function Sort({ className }: SortProps) {
+    const router = useRouter()
+    const pathname = usePathname()
+    const searchParams = useSearchParams()
+    const currSearch = new URLSearchParams(searchParams)
 
     const valueChangeHandler = (selection: SortMethod) => {
-        setQuery((prev) => ({
-            ...prev,
-            pageNum: 0,
-            sortMethod: selection
-        }))
+
+        currSearch.set('page', '1')
+        currSearch.set('sort', selection)
+    
+        router.push(`${pathname}?${currSearch.toString()}`)
     }
 
     return (
@@ -35,7 +35,7 @@ export function Sort({ query, setQuery, className }: SortProps) {
             <Select onValueChange={valueChangeHandler}>
                 <SelectTrigger className='border-none text-base text-left max-w-52 min-w-[95px]'>
                     <ArrowDownWideNarrow strokeWidth={1.75} size={20} className='min-w-5 mr-1'/>
-                    <SelectValue placeholder={<span>Sort By <span className='font-semibold'>{query.sortMethod}</span></span>} />
+                    <SelectValue placeholder={<span>Sort By <span className='font-semibold'>{searchParams.get('sort') || defaultSort}</span></span>} />
                 </SelectTrigger>
                 <SelectContent>
                     <SelectItem value="Relevance">Relevance</SelectItem>

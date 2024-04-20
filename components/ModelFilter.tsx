@@ -8,11 +8,8 @@ import {
   CommandGroup,
   CommandItem,
 } from "@/components/ui/command";
-import type { 
-  Query,
-  SetQuery
-} from '@/app/page'
-import type { Option } from '@/components/Filter'
+import { useSearchParams, useRouter, usePathname } from "next/navigation"
+import type { Option } from '@/components/Filters'
 import { Command as CommandPrimitive } from "cmdk";
 
 export type ModelOption = {
@@ -23,83 +20,67 @@ export type ModelOption = {
 
 type MultiSelectProps = {
   options: Option[]
-  query: Query
-  setQuery: SetQuery
-  selected?: string[]
-  modelsInRange: ModelOption[]
+  modelFilter: string[]
 }
 
 export function ModelFilter({ 
-  options, 
-  query,
-  setQuery,
-  selected,
-  modelsInRange
+  options,
+  modelFilter
 }:  MultiSelectProps) {
 
-  const inputRef = React.useRef<HTMLInputElement>(null);
-  const [open, setOpen] = React.useState(false);
-  const [inputValue, setInputValue] = React.useState("");
-  const modelFilter = query.filters.models
-  const makeFilter = query.filters.makes
-  const modelFilterValues = modelFilter.map(m => m.model)
+  const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+  const inputRef = React.useRef<HTMLInputElement>(null)
+  const [open, setOpen] = React.useState(false)
+  const [inputValue, setInputValue] = React.useState("")
+  const currSearch = new URLSearchParams(searchParams)
 
-  const handleSelect = React.useCallback((option: Option) => {
+  const handleSelect = (option: Option) => {
 
     setInputValue("")
     inputRef?.current?.blur()
     setOpen(false)
 
-    const modelInfo = modelsInRange.find(m => m.model === option.value)
+    currSearch.set('page', '1')
+    currSearch.append('model', option.value)
 
-    if (!modelInfo) return
+    router.push(`${pathname}?${currSearch.toString()}`);
 
-    setQuery((prev) => {
-
-      return {
-        ...prev,
-        pageNum: 0,
-        endOfListings: false,
-        filters: {
-            ...prev.filters,
-            models: [...prev.filters.models, modelInfo]
-        }
-    }})
-  }, [setQuery, modelsInRange]);
+  }
 
 
-  const handleUnselect = React.useCallback((option: String) => {
-    setQuery((prev) => ({
-      ...prev,
-      pageNum: 0,
-      endOfListings: false,
-      filters: {
-          ...prev.filters,
-          models: prev.filters.models.filter(s => s.model !== option)
-      }
-    }))
-  }, [setQuery]);
+  const handleUnselect = (model: String) => {
+  
+    currSearch.set('page', '1')
+    currSearch.delete('model', modelFilter.find(m => m === model))
+    const newModelFilter = currSearch.getAll('model').filter(m => m !== model)
+    currSearch.delete('model')
+    newModelFilter.forEach((m) => {
+    currSearch.append('model', m)
+    })
+
+    router.push(`${pathname}?${currSearch.toString()}`);
+
+  }
 
   
-  const handleKeyDown = React.useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     const input = inputRef.current
     if (input) {
       if (e.key === "Delete" || e.key === "Backspace") {
         if (input.value === "") {
-          setQuery((prev) => {
-            const newSelected = [...prev.filters.models]
-            newSelected.pop()
-            return {
-              ...prev,
-              pageNum: 0,
-              endOfListings: false,
-              filters: {
-                ...prev.filters,
-                models: newSelected
-              }
-            }
+
+          const lastElem = modelFilter[modelFilter.length - 1]
+
+          currSearch.set('page', '1')
+          const newModelFilter = currSearch.getAll('model').filter(m => m !== lastElem)
+          currSearch.delete('model')
+          newModelFilter.forEach((m) => {
+          currSearch.append('model', m)
           })
 
+          router.push(`${pathname}?${currSearch.toString()}`);
         }
       }
       // This is not a default behaviour of the <input /> field
@@ -107,9 +88,9 @@ export function ModelFilter({
         input.blur();
       }
     }
-  }, [setQuery]);
+  }
 
-  const selectables = options.filter(option => !modelFilterValues.includes(option.value));
+  const selectables = options.filter(option => !modelFilter.includes(option.value));
 
   return (
     <Command onKeyDown={handleKeyDown} className="overflow-visible bg-transparent">
@@ -117,7 +98,7 @@ export function ModelFilter({
         className="group border border-input px-3 py-2 text-sm ring-offset-background rounded-md focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2"
       >
         <div className="flex gap-1 flex-wrap">
-          {modelFilterValues.map((option) => {
+          {modelFilter.map((option) => {
             return (
               <Badge key={option} variant="secondary">
                 {option}

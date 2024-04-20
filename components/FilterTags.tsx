@@ -1,22 +1,22 @@
-import type { 
-    Query,
-    SetQuery
-} from '@/app/page'
+import { useFilters } from '@/lib/utils'
 import { 
     defaultPosition,
     defaultMileRange,
     defaultPriceRange,
-    defaultYearRange
+    defaultYearRange,
+    defaultZip
 } from '@/lib/defaults'
+import type { 
+    ModelCount 
+} from '@/components/Search'
 import { formatToPrice } from '@/components/PriceFilter'
 import { FilterTag } from '@/components/ui/filter-tag'
-
+import { useSearchParams, useRouter, usePathname } from "next/navigation"
 
 type FilterTagsProps = {
-    query: Query
-    setQuery: SetQuery
     resetKeyword: () => void
     resetLocation: () => void
+    modelsInRange: ModelCount[]
 }
 
 function getPriceDescription(minPrice: number, maxPrice: number): string {
@@ -31,113 +31,111 @@ function getYearDescription(minYear: number, maxYear: number): string {
     return `${minYear} to ${maxYear}`
 }
 
-export function FilterTags({ query, setQuery, resetKeyword, resetLocation }: FilterTagsProps) {
-    const modelFilterValues = query.filters.models.map(m => m.model)
-    const makeFilterValues = query.filters.makes
-    const locationDescription = `Within ${query.position.range} miles of ${query.zipCode}`
-    const [minPrice, maxPrice] = query.filters.price
-    const [minYear, maxYear] = query.filters.year
+export function FilterTags({ 
+    resetKeyword, 
+    resetLocation, 
+    modelsInRange 
+}: FilterTagsProps) {
+    const router = useRouter()
+    const pathname = usePathname()
+    const searchParams = useSearchParams()
+    const { 
+        keywordFilter,
+        makeFilter, 
+        modelFilter, 
+        yearFilter, 
+        priceFilter, 
+        rangeFilter,
+        zip,
+        hideNullPrices
+    } = useFilters()
+    const [minYear, maxYear] = yearFilter
+    const [minPrice, maxPrice] = priceFilter
+    const locationDescription = `Within ${rangeFilter} miles of ${zip}`
     const priceDescription = getPriceDescription(minPrice, maxPrice)
     const yearDescription = getYearDescription(minYear, maxYear)
+    const currSearch = new URLSearchParams(searchParams)
     
     const makeUnselectHandler = (make: string) => {
+  
+        currSearch.set('page', '1')
+        const newMakeFilter = currSearch.getAll('make').filter(m => m !== make)
+        currSearch.delete('make')
+        newMakeFilter.forEach((m) => {
+            currSearch.append('make', m)
+        })
 
-        setQuery((prev) => {
-        const newMakeFilter = prev.filters.makes.filter(m => m !== make)
-        
-        return {
-            ...prev,
-            pageNum: 0,
-            endOfListings: false,
-            filters: {
-                ...prev.filters,
-                makes: newMakeFilter,
-                models: prev.filters.models.filter(m => newMakeFilter.includes(m.make))
-            }
+        const newModelFilter = currSearch.getAll('model')
+        currSearch.delete('model')
+        newModelFilter.forEach((m) => {
+        const make = modelsInRange.find(opt => opt.model === m)?.make
+        if (make && newMakeFilter.includes(make)) {
+            currSearch.append('model', m)
         }
         })
+        router.push(`${pathname}?${currSearch.toString()}`)
     }
 
     const modelUnselectHandler = (model: String) => {
-        setQuery((prev) => ({
-          ...prev,
-          pageNum: 0,
-          endOfListings: false,
-          filters: {
-              ...prev.filters,
-              models: prev.filters.models.filter(m => m.model !== model)
-          }
-        }))
+  
+        currSearch.set('page', '1')
+        currSearch.delete('model', modelFilter.find(m => m === model))
+        const newModelFilter = currSearch.getAll('model').filter(m => m !== model)
+        currSearch.delete('model')
+        newModelFilter.forEach((m) => {
+        currSearch.append('model', m)
+        })
+        router.push(`${pathname}?${currSearch.toString()}`)
     }
 
     const keywordUnselectHandler = () => {
         resetKeyword()
-        setQuery((prev) => ({
-          ...prev,
-          keyword: '',
-          pageNum: 0,
-          endOfListings: false
-        }))
+        currSearch.set('keyWord', '')
+        currSearch.set('page', '1')
+        router.push(`${pathname}?${currSearch.toString()}`)
     }
 
     const positionUnselectHandler = () => {
         resetLocation()
-        setQuery((prev) => ({
-          ...prev,
-          position: defaultPosition,
-          location: '',
-          pageNum: 0,
-          endOfListings: false
-        }))
+        currSearch.set('page', '1')
+        currSearch.set('long', defaultPosition.long.toString())
+        currSearch.set('lat', defaultPosition.lat.toString())
+        currSearch.set('range', defaultPosition.range)
+        currSearch.set('zip', defaultZip)
+        router.push(`${pathname}?${currSearch.toString()}`)
     }
 
     const priceUnselectHandler = () => {
-        setQuery((prev) => ({
-            ...prev,
-            pageNum: 0,
-            endOfListings: false,
-            filters: {
-                ...prev.filters,
-                price: defaultPriceRange
-            }
-        }))
+        currSearch.set('page', '1')
+        currSearch.delete('priceMin')
+        currSearch.delete('priceMax')
+        router.push(`${pathname}?${currSearch.toString()}`)
     }
 
     const yearUnselectHandler = () => {
-        setQuery((prev) => ({
-            ...prev,
-            pageNum: 0,
-            endOfListings: false,
-            filters: {
-                ...prev.filters,
-                year: defaultYearRange
-            }
-        }))
+        currSearch.set('page', '1')
+        currSearch.delete('yearMin')
+        currSearch.delete('yearMax')
+        router.push(`${pathname}?${currSearch.toString()}`)
     }
 
     const hideNullPricesUnselectHandler = () => {
-        setQuery((prev) => ({
-            ...prev,
-            pageNum: 0,
-            endOfListings: false,
-            filters: {
-                ...prev.filters,
-                hideNullPrices: false
-            }
-        }))
+        currSearch.set('page', '1')
+        currSearch.delete('hideNullPrices')
+        router.push(`${pathname}?${currSearch.toString()}`)
     }
-    
+
     return (
         <div className='flex flex-wrap gap-2'>
-            {query.keyword !== '' && <FilterTag title='KEYWORD' content={query.keyword} unselectHandler={keywordUnselectHandler} />}
-            {query.position.range !== defaultMileRange && <FilterTag  title='LOCATION' content={locationDescription} unselectHandler={positionUnselectHandler} />}
-            {JSON.stringify(query.filters.price) !== JSON.stringify(defaultPriceRange) && <FilterTag  title='PRICE' content={priceDescription} unselectHandler={priceUnselectHandler} />}
-            {query.filters.hideNullPrices && <FilterTag  title='PRICE' content={'Has Price'} unselectHandler={hideNullPricesUnselectHandler} />}
-            {JSON.stringify(query.filters.year) !== JSON.stringify(defaultYearRange) && <FilterTag  title='YEAR' content={yearDescription} unselectHandler={yearUnselectHandler} />}
-            {makeFilterValues.map((make) => (
+            {keywordFilter !== '' && <FilterTag title='KEYWORD' content={keywordFilter} unselectHandler={keywordUnselectHandler} />}
+            {rangeFilter && rangeFilter !== defaultMileRange && <FilterTag  title='LOCATION' content={locationDescription} unselectHandler={positionUnselectHandler} />}
+            {JSON.stringify(priceFilter) !== JSON.stringify(defaultPriceRange) && <FilterTag  title='PRICE' content={priceDescription} unselectHandler={priceUnselectHandler} />}
+            {hideNullPrices && <FilterTag  title='PRICE' content={'Has Price'} unselectHandler={hideNullPricesUnselectHandler} />}
+            {JSON.stringify(yearFilter) !== JSON.stringify(defaultYearRange) && <FilterTag  title='YEAR' content={yearDescription} unselectHandler={yearUnselectHandler} />}
+            {makeFilter.map((make) => (
                 <FilterTag key={make} title='MAKE' content={make} unselectHandler={makeUnselectHandler} />
             ))}
-            {modelFilterValues.map((model) => (
+            {modelFilter.map((model) => (
                 <FilterTag  key={model} title='MODEL' content={model} unselectHandler={modelUnselectHandler} />
             ))}
         </div>

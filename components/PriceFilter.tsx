@@ -1,16 +1,13 @@
-
-import  {
+import {
     type FocusEvent,
     useState
 } from 'react'
-import { 
-    type Query,
-    type SetQuery
-} from '@/app/page'
-import { defaultPriceRange } from '@/lib/defaults'
+import { defaultPriceRange, PriceRange } from '@/lib/defaults'
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Checkbox } from "@/components/ui/checkbox"
+import { useSearchParams, useRouter, usePathname } from "next/navigation"
+
 
 export const formatToPrice = (val: string | number) => {
     return Number(val).toLocaleString('en-US', {
@@ -20,39 +17,28 @@ export const formatToPrice = (val: string | number) => {
     })
 }
 
-export function PriceFilter({ query, setQuery }: {query: Query, setQuery: SetQuery }) {
-    const [isChecked, setIsChecked] = useState(query.filters.hideNullPrices)
-    const [currFilterMin, currFilterMax] = [query.filters.price[0], query.filters.price[1]]
+export function PriceFilter({ priceFilter, hideNullPrices }: { priceFilter: PriceRange, hideNullPrices: boolean }) {
+    const router = useRouter()
+    const pathname = usePathname()
+    const searchParams = useSearchParams()
+    const [isChecked, setIsChecked] = useState(hideNullPrices)
+    const [currFilterMin, currFilterMax] = priceFilter
     const [minInputValue, setMinInputValue] = useState(currFilterMin === defaultPriceRange[0] ? '' : formatToPrice(currFilterMin))
     const [maxInputValue, setMaxInputValue] = useState(currFilterMax === defaultPriceRange[1] ? '' : formatToPrice(currFilterMax))
+    const currSearch = new URLSearchParams(searchParams)
 
     const handleMinBlur = (e: FocusEvent<HTMLInputElement>) => {
         const val = Number(e.target.value.replace(/\D/g, ''))
-
+        
         if (!val || val > currFilterMax) {
             setMinInputValue('')
-            setQuery((prev) => ({
-                ...prev,
-                pageNum: 0,
-                endOfListings: false,
-                filters: {
-                    ...prev.filters,
-                    price: [defaultPriceRange[0], prev.filters.price[1]]
-                }
-            }))
-            return
+        } else {
+            setMinInputValue(formatToPrice(val))
+            currSearch.set('priceMin', val.toString())
         }
 
-        setMinInputValue(formatToPrice(val))
-        setQuery((prev) => ({
-            ...prev,
-            pageNum: 0,
-            endOfListings: false,
-            filters: {
-                ...prev.filters,
-                price: [val, prev.filters.price[1]]
-            }
-        }))
+        currSearch.set('page', '1')
+        router.push(`${pathname}?${currSearch.toString()}`)
     }
 
     const handleMaxBlur = (e: FocusEvent<HTMLInputElement>) => {
@@ -60,28 +46,14 @@ export function PriceFilter({ query, setQuery }: {query: Query, setQuery: SetQue
 
         if (!val || val < currFilterMin) {
             setMaxInputValue('')
-            setQuery((prev) => ({
-                ...prev,
-                pageNum: 0,
-                endOfListings: false,
-                filters: {
-                    ...prev.filters,
-                    price: [prev.filters.price[0], defaultPriceRange[1]]
-                }
-            }))
-            return
+        }
+        else {
+            setMaxInputValue(formatToPrice(val))
+            currSearch.set('priceMax', val.toString())
         }
 
-        setMaxInputValue(formatToPrice(val))
-        setQuery((prev) => ({
-            ...prev,
-            pageNum: 0,
-            endOfListings: false,
-            filters: {
-                ...prev.filters,
-                price: [prev.filters.price[0], val]
-            }
-        }))
+        currSearch.set('page', '1')
+        router.push(`${pathname}?${currSearch.toString()}`)
     }
 
     return (
@@ -110,22 +82,17 @@ export function PriceFilter({ query, setQuery }: {query: Query, setQuery: SetQue
             </div>
             <div className="flex items-center space-x-2">
                 <Checkbox 
-                    id="includeNulls" 
+                    id="hideNulls" 
                     checked={isChecked}
                     onCheckedChange={(checked: boolean) => {
                         setIsChecked(checked)
-                        setQuery((prev) => ({
-                            ...prev,
-                            pageNum: 0,
-                            endOfListings: false,
-                            filters: {
-                                ...prev.filters,
-                                hideNullPrices: checked
-                            }
-                        }))
+                        if (checked) currSearch.set('hideNullPrices', '')
+                        else currSearch.delete('hideNullPrices')
+                        
+                        router.push(`${pathname}?${currSearch.toString()}`)
                     }}
                 />
-                <Label htmlFor="includeNulls">Hide listings with no price</Label>
+                <Label htmlFor="hideNulls">Hide listings with no price</Label>
             </div>
         </div>
     )

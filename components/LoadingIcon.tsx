@@ -1,8 +1,12 @@
+'use client'
+
 import { LoaderCircle } from 'lucide-react'
 import Moto from '@/public/Moto'
+import { useLoadingContext } from '@/app/contexts/loadingContext'
 
 
-function LoadingIcon({loadingState}: {loadingState: string | undefined}) {
+function LoadingIcon() {
+    const { loadingState } = useLoadingContext()
 
     return (
         <div className={`absolute left-1/2 transform -translate-x-1/2 pointer-events-none ${loadingState === 'loading' ? 'opacity-1':  'opacity-0'}`}>
