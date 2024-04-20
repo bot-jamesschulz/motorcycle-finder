@@ -98,7 +98,7 @@ export default function Results() {
                 <div>
                     <div className="flex flex-col justify-center items-center gap-4">
                         <div className='font-normal text-2xl'>
-                            <span className='font-medium'>{resultsCount}</span> results                        
+                            <span className='font-medium'>{resultsCount.toLocaleString()}</span> results                        
                         </div>
                         <div className="flex flex-wrap justify-center items-center gap-5 max-w-screen-xl">
                             {listings.length
