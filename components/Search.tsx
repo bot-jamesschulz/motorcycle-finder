@@ -183,12 +183,12 @@ export function Search() {
     }, [Supabase, router, searchParams, setLoadingState])
 
     return  (
-        <div className={`${pathname.split('/')[1] !== 'motorcycles-for-sale' && 'translate-y-[40%] sm:translate-y-[90%]'} transition-all duration-700 ease-in-out flex flex-col justify-center items-center mx-2 gap-10 w-full`}>  
+        <div className={`${pathname.split('/')[1] !== 'motorcycles-for-sale' && 'translate-y-[40%] sm:translate-y-[90%]'} transition-all duration-700 ease-in-out flex flex-col justify-center items-center gap-10`}>  
               <div className='relative w-fit'>
-                <div className='flex flex-col '>
+                <div className='flex flex-col justify-center items-center'>
                     <Form {...form}>
                         <form onSubmit={form.handleSubmit(searchHandler)} className="flex flex-col gap-5 w-full">
-                            <div className="flex flex-col gap-5 w-full h-1/2 max-w-2xl"> 
+                            <div className="flex flex-col gap-5 w-full h-1/2 max-w-2xl px-2"> 
                                 <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl">Find your next motorcycle.</h1>
                                 <div className="w-full">
                                     <FormField
