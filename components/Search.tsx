@@ -183,7 +183,7 @@ export function Search() {
     }, [Supabase, router, searchParams, setLoadingState])
 
     return  (
-        <div className={`${pathname.split('/')[1] !== 'motorcycles-for-sale' && 'translate-y-[90%]'} transition-all duration-700 ease-in-out flex flex-col justify-center items-center gap-10 w-full`}>  
+        <div className={`${pathname.split('/')[1] !== 'motorcycles-for-sale' && 'translate-y-[40%] sm:translate-y-[90%]'} transition-all duration-700 ease-in-out flex flex-col justify-center items-center mx-2 gap-10 w-full`}>  
               <div className='relative w-fit'>
                 <div className='flex flex-col '>
                     <Form {...form}>
