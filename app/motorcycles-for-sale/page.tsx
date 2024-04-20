@@ -5,7 +5,6 @@ import {
     useFilters, 
     milesToMeters 
 } from '@/lib/utils'
-import { Separator } from "@/components/ui/separator"
 import { Paginate } from '@/components/Pagination'
 import { LocationMiss } from '@/components/LocationMiss'
 import { useSupabaseContext } from "@/app/contexts/supabaseContext"
@@ -237,20 +236,16 @@ export default function Results() {
                     />
                 </div>
                 )}
-                {loadingState === "no results" && <NoResults />}
+                {loadingState === "no results" && (
+                    <h4 className="scroll-m-20 text-xl font-semibold tracking-tight text-center">
+                        <p>No listings found.</p>
+                        <p className="text-sm text-muted-foreground">
+                            Try expanding your search radius.
+                        </p>
+                    </h4>
+                )}
                 {loadingState === "location not found" && <LocationMiss />}
             </div>
         </div>
-    );
-}
-
-export function NoResults() {
-    return (
-        <h4 className="scroll-m-20 text-xl font-semibold tracking-tight text-center">
-        <p>No listings found.</p>
-        <p className="text-sm text-muted-foreground">
-            Try expanding your search radius.
-        </p>
-        </h4>
     );
 }
