@@ -130,7 +130,7 @@ export default function Home() {
                                       }}
                                   />
                                 </div>
-                                <div className="grow h-56 flex flex-col justify-between w-full">
+                                <div className="grow h-44 flex flex-col justify-between w-full">
                                   <CardHeader className="w-full">
                                       <CardTitle className="flex justify-between gap-4 text-sm leading-none">
                                       <span>
