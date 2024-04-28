@@ -183,7 +183,7 @@ export function Search() {
     }, [Supabase, router, searchParams, setLoadingState])
 
     return  (
-        <div className={`${pathname.split('/')[1] !== 'motorcycles-for-sale' && 'translate-y-[40%] sm:translate-y-[90%]'} transition-all duration-700 ease-in-out flex flex-col justify-center items-center gap-10`}>  
+        <div className={`mt-12 flex flex-col justify-center items-center gap-10`}>  
               <div className='relative w-fit'>
                 <div className='flex flex-col justify-center items-center'>
                     <Form {...form}>
@@ -265,17 +265,13 @@ export function Search() {
                                     </div>
                                 </div>
                                 <div className={`flex ${loadingState === 'loaded' ? 'justify-start' : 'justify-center'} content-center gap-2`}>
-                                <div className='self-center mr-4 h-9 grow basis-0 max-w-52'>
-                                    <Button className="w-full" type="submit">Search</Button>
-                                </div>
-                                { loadingState && 
+                                    <div className='self-center mr-4 h-9 grow basis-0 max-w-52'>
+                                        <Button className="w-full" type="submit">Search</Button>
+                                    </div>
                                     <div className='flex items-center max-w-40 justify-between h-9 py-2 px-4 self-center grow basis-0'>
                                         <Filter modelsInRange={modelsInRange} setModelsInRange={setModelsInRange}/>
                                     </div>                     
-                                }
-                                { loadingState && 'loaded' && 
                                     <Sort className='self-center grow basis-0' />
-                                }
                                 </div>
                             </div>
                         </form>

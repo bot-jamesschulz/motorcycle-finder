@@ -13,8 +13,7 @@ import type { ModelCount } from '@/components/Search'
 import { Command as CommandPrimitive } from "cmdk"
 import { 
   useSearchParams, 
-  useRouter, 
-  usePathname 
+  useRouter
 } from "next/navigation"
 
 type MultiSelectProps = {
@@ -30,7 +29,7 @@ export function MakeFilter({
 }:  MultiSelectProps) {
 
   const router = useRouter()
-  const pathname = usePathname()
+  const resultsPage = '/motorcycles-for-sale'
   const searchParams = useSearchParams()
   const inputRef = React.useRef<HTMLInputElement>(null)
   const [open, setOpen] = React.useState(false)
@@ -46,7 +45,7 @@ export function MakeFilter({
 
     currSearch.set('page', '1')
     currSearch.append('make', option.value)
-    router.push(`${pathname}?${currSearch.toString()}`);
+    router.push(`${resultsPage}?${currSearch.toString()}`);
   }
 
   const handleUnselect = (make: String) => {
@@ -67,7 +66,7 @@ export function MakeFilter({
       }
     })
 
-    router.push(`${pathname}?${currSearch.toString()}`)
+    router.push(`${resultsPage}?${currSearch.toString()}`)
 
   }
 
@@ -94,7 +93,7 @@ export function MakeFilter({
             }
           })
 
-          router.push(`${pathname}?${currSearch.toString()}`)
+          router.push(`${resultsPage}?${currSearch.toString()}`)
         }
       }
       // This is not a default behaviour of the <input /> field

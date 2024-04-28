@@ -8,7 +8,7 @@ import {
   CommandGroup,
   CommandItem,
 } from "@/components/ui/command";
-import { useSearchParams, useRouter, usePathname } from "next/navigation"
+import { useSearchParams, useRouter } from "next/navigation"
 import type { Option } from '@/components/Filters'
 import { Command as CommandPrimitive } from "cmdk";
 
@@ -29,7 +29,7 @@ export function ModelFilter({
 }:  MultiSelectProps) {
 
   const router = useRouter()
-  const pathname = usePathname()
+  const resultsPage = '/motorcycles-for-sale'
   const searchParams = useSearchParams()
   const inputRef = React.useRef<HTMLInputElement>(null)
   const [open, setOpen] = React.useState(false)
@@ -45,7 +45,7 @@ export function ModelFilter({
     currSearch.set('page', '1')
     currSearch.append('model', option.value)
 
-    router.push(`${pathname}?${currSearch.toString()}`);
+    router.push(`${resultsPage}?${currSearch.toString()}`);
 
   }
 
@@ -60,7 +60,7 @@ export function ModelFilter({
     currSearch.append('model', m)
     })
 
-    router.push(`${pathname}?${currSearch.toString()}`);
+    router.push(`${resultsPage}?${currSearch.toString()}`);
 
   }
 
@@ -80,7 +80,7 @@ export function ModelFilter({
           currSearch.append('model', m)
           })
 
-          router.push(`${pathname}?${currSearch.toString()}`);
+          router.push(`${resultsPage}?${currSearch.toString()}`);
         }
       }
       // This is not a default behaviour of the <input /> field

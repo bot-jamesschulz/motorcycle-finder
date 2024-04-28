@@ -12,12 +12,12 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select-original"
-import { useSearchParams, useRouter, usePathname } from "next/navigation"
+import { useSearchParams, useRouter } from "next/navigation"
 
 
 export function YearFilter({ yearFilter }: {yearFilter: YearRange }) {
     const router = useRouter()
-    const pathname = usePathname()
+    const resultsPage = '/motorcycles-for-sale'
     const searchParams = useSearchParams()
     const currSearch = new URLSearchParams(searchParams)
     const [currFilterMin, currFilterMax] = yearFilter
@@ -38,7 +38,7 @@ export function YearFilter({ yearFilter }: {yearFilter: YearRange }) {
         }
 
         currSearch.set('page', '1')
-        router.push(`${pathname}?${currSearch.toString()}`)
+        router.push(`${resultsPage}?${currSearch.toString()}`)
     }
 
     const handleMaxYearChange = (val: string) => {
@@ -53,7 +53,7 @@ export function YearFilter({ yearFilter }: {yearFilter: YearRange }) {
         }
 
         currSearch.set('page', '1')
-        router.push(`${pathname}?${currSearch.toString()}`)
+        router.push(`${resultsPage}?${currSearch.toString()}`)
     }
 
     return (

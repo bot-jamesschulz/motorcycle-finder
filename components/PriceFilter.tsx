@@ -6,7 +6,7 @@ import { defaultPriceRange, PriceRange } from '@/lib/defaults'
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Checkbox } from "@/components/ui/checkbox"
-import { useSearchParams, useRouter, usePathname } from "next/navigation"
+import { useSearchParams, useRouter } from "next/navigation"
 
 
 export const formatToPrice = (val: string | number) => {
@@ -19,7 +19,7 @@ export const formatToPrice = (val: string | number) => {
 
 export function PriceFilter({ priceFilter, hideNullPrices }: { priceFilter: PriceRange, hideNullPrices: boolean }) {
     const router = useRouter()
-    const pathname = usePathname()
+    const resultsPage = '/motorcycles-for-sale'
     const searchParams = useSearchParams()
     const [isChecked, setIsChecked] = useState(hideNullPrices)
     const [currFilterMin, currFilterMax] = priceFilter
@@ -38,7 +38,7 @@ export function PriceFilter({ priceFilter, hideNullPrices }: { priceFilter: Pric
         }
 
         currSearch.set('page', '1')
-        router.push(`${pathname}?${currSearch.toString()}`)
+        router.push(`${resultsPage}?${currSearch.toString()}`)
     }
 
     const handleMaxBlur = (e: FocusEvent<HTMLInputElement>) => {
@@ -53,7 +53,7 @@ export function PriceFilter({ priceFilter, hideNullPrices }: { priceFilter: Pric
         }
 
         currSearch.set('page', '1')
-        router.push(`${pathname}?${currSearch.toString()}`)
+        router.push(`${resultsPage}?${currSearch.toString()}`)
     }
 
     return (
@@ -89,7 +89,7 @@ export function PriceFilter({ priceFilter, hideNullPrices }: { priceFilter: Pric
                         if (checked) currSearch.set('hideNullPrices', '')
                         else currSearch.delete('hideNullPrices')
                         
-                        router.push(`${pathname}?${currSearch.toString()}`)
+                        router.push(`${resultsPage}?${currSearch.toString()}`)
                     }}
                 />
                 <Label htmlFor="hideNulls">Hide listings with no price</Label>

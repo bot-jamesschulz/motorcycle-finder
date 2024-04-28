@@ -152,8 +152,8 @@ export default function Results() {
                                         </h4>
                                         )}
                                         <a href={detailsUrl} rel="external" target="_blank">
-                                        <Card className="flex flex-col justify-start items-center overflow-hidden min-w-[300px] w-[300px] xs:w-[350px] sm:min-w-full sm:max-w-full sm:flex-row sm:w-[600px] sm:h-[200px] sm:items-start">
-                                            <div className="w-full sm:w-[250px] sm:h-[200px] flex justify-center items-center">
+                                        <Card className="flex flex-col justify-start items-center overflow-hidden min-w-[300px] w-[300px] xs:w-[350px] sm:min-w-full sm:max-w-full sm:flex-row sm:w-[600px] sm:h-[200px] sm:items-start shadow-xl">
+                                            <div className=" shadow-md w-full sm:w-[250px] sm:h-[200px] flex justify-center items-center">
                                             <Image
                                                 src={imgSrc || ""}
                                                 width={1000}

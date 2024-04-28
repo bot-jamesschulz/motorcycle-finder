@@ -7,7 +7,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
-import { useSearchParams, useRouter, usePathname } from "next/navigation"
+import { useSearchParams, useRouter } from "next/navigation"
 import { ArrowDownWideNarrow } from 'lucide-react'
 import { defaultSort } from '@/lib/defaults'
 
@@ -18,7 +18,7 @@ type SortProps = {
 
 export function Sort({ className }: SortProps) {
     const router = useRouter()
-    const pathname = usePathname()
+    const resultsPage = '/motorcycles-for-sale'
     const searchParams = useSearchParams()
     const currSearch = new URLSearchParams(searchParams)
 
@@ -27,7 +27,7 @@ export function Sort({ className }: SortProps) {
         currSearch.set('page', '1')
         currSearch.set('sort', selection)
     
-        router.push(`${pathname}?${currSearch.toString()}`)
+        router.push(`${resultsPage}?${currSearch.toString()}`)
     }
 
     return (
