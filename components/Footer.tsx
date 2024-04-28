@@ -3,7 +3,7 @@ import { Mail } from 'lucide-react'
 
 export function Footer() {
     return (
-        <div className='mt-12 w-3/4 font-light flex flex-col justify-center items-center gap-2'>
+        <div className='w-3/4 font-light flex flex-col justify-center items-center gap-2'>
             <h2 className="text-lg tracking-tight">
                 <p>Currently only aggregates <span className='font-normal'>California dealerships</span>.</p>
                 

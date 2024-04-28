@@ -47,7 +47,7 @@ export default function RootLayout({
                   <Analytics />  
               </SupabaseContextProvider>
             </LoadingContextProvider>
-            <footer className='flex flex-col justify-center items-center w-full mt-12  py-4 bg-slate-200 shadow dark:bg-slate-950 dark:text-slate-50 text-center rounded-t-2xl'>
+            <footer className='flex flex-col justify-center items-center w-full mt-32 py-4 bg-slate-200 shadow dark:bg-slate-950 dark:text-slate-50 text-center rounded-t-2xl'>
               <Footer />
             </footer>
           </Suspense>
