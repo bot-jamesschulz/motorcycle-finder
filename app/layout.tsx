@@ -15,7 +15,7 @@ import { ModeToggle } from "@/components/ui/mode-toggle"
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Motorcycle Finder, California: New and Used Dealership motorcycles for sale in California.",
+  title: "Motorcycle Finder, California: New and Used Dealership Motorcycles for Sale in California.",
   description: "Find your next motorcycle, with the most comprehensive database of new and used dealership motorcycle listings available.",
 };
 

@@ -90,7 +90,7 @@ export function FilterTags({
 
     const keywordUnselectHandler = () => {
         resetKeyword()
-        currSearch.set('keyWord', '')
+        currSearch.set('keyword', '')
         currSearch.set('page', '1')
         router.push(`${pathname}?${currSearch.toString()}`)
     }
